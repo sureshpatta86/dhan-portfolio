@@ -1,0 +1,236 @@
+'use client';
+
+import { useState } from 'react';
+import { useHoldings } from '@/features/portfolio';
+import type { DhanHolding } from '@/features/portfolio/types';
+import { LoadingSkeleton } from '@/lib/components/ui/LoadingStates';
+import { useToast } from '@/lib/components/ui/ToastProvider';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+
+const HoldingsCard = ({ holding }: { holding: DhanHolding }) => {
+  const totalValue = holding.totalQty * holding.avgCostPrice;
+  
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all duration-300 transform hover:-translate-y-1 animate-fade-in">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+            {holding.tradingSymbol}
+          </h3>
+          <p className="text-sm text-gray-600">{holding.exchange}</p>
+          <p className="text-xs text-gray-500">ISIN: {holding.isin}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-lg font-bold text-gray-900">₹{holding.avgCostPrice.toFixed(2)}</p>
+          <p className="text-sm text-gray-600">Avg Price</p>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <p className="text-gray-600">Total Qty</p>
+          <p className="font-medium text-gray-900">{holding.totalQty}</p>
+        </div>
+        <div>
+          <p className="text-gray-600">Available Qty</p>
+          <p className="font-medium text-gray-900">{holding.availableQty}</p>
+        </div>
+        <div>
+          <p className="text-gray-600">DP Qty</p>
+          <p className="font-medium text-gray-900">{holding.dpQty}</p>
+        </div>
+        <div>
+          <p className="text-gray-600">T1 Qty</p>
+          <p className="font-medium text-gray-900">{holding.t1Qty}</p>
+        </div>
+      </div>
+      
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600">Total Value</span>
+          <span className="text-lg font-bold text-green-600">₹{totalValue.toFixed(2)}</span>
+        </div>
+        {holding.collateralQty > 0 && (
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-gray-600">Collateral Qty</span>
+            <span className="text-orange-600">{holding.collateralQty}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const HoldingsStats = ({ holdings }: { holdings: DhanHolding[] }) => {
+  const totalValue = holdings.reduce((sum, holding) => 
+    sum + (holding.totalQty * holding.avgCostPrice), 0
+  );
+  
+  const totalQty = holdings.reduce((sum, holding) => sum + holding.totalQty, 0);
+  
+  return (
+    <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white mb-6">
+      <h2 className="text-2xl font-bold mb-4">Portfolio Overview</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <p className="text-blue-100">Total Holdings</p>
+          <p className="text-3xl font-bold">{holdings.length}</p>
+        </div>
+        <div>
+          <p className="text-blue-100">Total Quantity</p>
+          <p className="text-3xl font-bold">{totalQty.toLocaleString()}</p>
+        </div>
+        <div>
+          <p className="text-blue-100">Total Value</p>
+          <p className="text-3xl font-bold">₹{totalValue.toLocaleString()}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default function Holdings() {
+  const { data, isLoading, error, isError, refetch } = useHoldings();
+  const { addToast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleRefresh = async () => {
+    try {
+      await refetch();
+      addToast({
+        type: 'success',
+        title: 'Holdings Refreshed',
+        message: 'Your holdings data has been updated successfully.',
+      });
+    } catch (error) {
+      addToast({
+        type: 'error',
+        title: 'Refresh Failed',
+        message: 'Failed to refresh holdings data. Please try again.',
+      });
+    }
+  };
+
+  // Filter holdings based on search term
+  const filteredHoldings = (data || []).filter((holding: DhanHolding) =>
+    holding.tradingSymbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    holding.exchange.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <div className="mb-6">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-64 mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-48"></div>
+          </div>
+        </div>
+        
+        {/* Loading skeleton for stats */}
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white mb-6">
+          <div className="animate-pulse">
+            <div className="h-8 bg-white bg-opacity-20 rounded w-48 mb-4"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="h-4 bg-white bg-opacity-20 rounded w-24"></div>
+                  <div className="h-8 bg-white bg-opacity-20 rounded w-16"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        <LoadingSkeleton type="cards" count={6} />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <div className="text-red-600 mb-4">
+          <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          <h3 className="text-lg font-semibold">Error loading holdings</h3>
+          <p className="text-red-500">{error?.message}</p>
+        </div>
+        <button
+          onClick={() => refetch()}
+          className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+        <div className="text-gray-400 mb-2">
+          <h3 className="text-xl font-semibold text-gray-600">No Holdings Found</h3>
+          <p className="text-gray-500">You don't have any holdings in your portfolio yet.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6">
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Holdings Portfolio</h1>
+          <p className="text-gray-600">Your long-term investment holdings</p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <div className="relative">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search holdings..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[200px]"
+            />
+          </div>
+          <button
+            onClick={handleRefresh}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center whitespace-nowrap"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <HoldingsStats holdings={filteredHoldings} />
+
+      {searchTerm && (
+        <div className="mb-4 text-sm text-gray-600">
+          Found {filteredHoldings.length} holding(s) matching "{searchTerm}"
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredHoldings.map((holding: DhanHolding) => (
+          <HoldingsCard key={`${holding.securityId}-${holding.isin}`} holding={holding} />
+        ))}
+      </div>
+
+      {filteredHoldings.length === 0 && searchTerm && (
+        <div className="text-center py-8">
+          <MagnifyingGlassIcon className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No holdings found</h3>
+          <p className="text-gray-500">
+            No holdings match your search for "{searchTerm}". Try a different search term.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
