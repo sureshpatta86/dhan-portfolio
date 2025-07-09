@@ -10,7 +10,7 @@ export const APP_CONFIG = {
 } as const;
 
 export const API_CONFIG = {
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || '',
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'),
   timeout: 30000,
   retries: 3,
 } as const;

@@ -9,7 +9,9 @@ import {
   EyeIcon,
   ClockIcon,
   ShieldCheckIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  ShoppingCartIcon,
+  DocumentDuplicateIcon
 } from '@heroicons/react/24/outline';
 import { useHoldings, usePositions } from '@/features/portfolio';
 import type { DhanHolding, DhanPosition } from '@/features/portfolio/types';
@@ -217,6 +219,13 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ onNavigate }) => {
 
   const quickActions = [
     {
+      title: 'Place Orders',
+      description: 'Buy and sell stocks with advanced order types',
+      icon: ShoppingCartIcon,
+      color: 'bg-purple-500',
+      onClick: () => onNavigate('/trading/orders')
+    },
+    {
       title: 'View Holdings',
       description: 'Check your long-term investment portfolio',
       icon: ChartBarIcon,
@@ -229,6 +238,13 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ onNavigate }) => {
       icon: ArrowTrendingUpIcon,
       color: 'bg-green-500',
       onClick: () => onNavigate('/portfolio/positions')
+    },
+    {
+      title: 'Trade Book',
+      description: 'View your trading history and executed trades',
+      icon: DocumentDuplicateIcon,
+      color: 'bg-orange-500',
+      onClick: () => onNavigate('/trading/trades')
     },
     {
       title: 'Funds',

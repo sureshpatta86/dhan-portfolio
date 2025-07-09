@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   HomeIcon, 
   ChartBarIcon, 
@@ -22,6 +22,23 @@ import {
   ChevronDownIcon,
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
+
+// Debug: Check if all icons are properly imported
+const iconDebug = {
+  HomeIcon, ChartBarIcon, DocumentTextIcon, CogIcon, Bars3Icon, XMarkIcon,
+  UserIcon, BanknotesIcon, ClockIcon, ShoppingCartIcon, DocumentChartBarIcon,
+  GlobeAltIcon, CubeIcon, ArrowTrendingUpIcon, SignalIcon, DocumentDuplicateIcon,
+  BellIcon, ChevronDownIcon, ChevronRightIcon
+};
+
+if (typeof window !== 'undefined') {
+  console.log('Icon debug:', iconDebug);
+  Object.entries(iconDebug).forEach(([name, icon]) => {
+    if (!icon) {
+      console.error(`Icon ${name} is undefined!`);
+    }
+  });
+}
 import KillSwitchIndicator from '@/components/KillSwitchIndicator';
 
 interface NavigationItem {
@@ -53,11 +70,13 @@ const navigation: NavigationItem[] = [
   {
     name: 'Trading',
     icon: ShoppingCartIcon,
-    status: 'coming-soon',
+    status: 'active',
     children: [
-      { name: 'Place Order', href: '/trading/orders', icon: ShoppingCartIcon, status: 'coming-soon' },
-      { name: 'Super Order', href: '/trading/super-order', icon: DocumentDuplicateIcon, status: 'coming-soon' },
-      { name: 'Forever Order', href: '/trading/forever-order', icon: ClockIcon, status: 'coming-soon' }
+      { name: 'Place Order', href: '/trading/orders', icon: ShoppingCartIcon, status: 'active' },
+      { name: 'Orders', href: '/trading/orders', icon: DocumentDuplicateIcon, status: 'active' },
+      { name: 'Trade Book', href: '/trading/trades', icon: DocumentDuplicateIcon, status: 'active' },
+      { name: 'Super Order', href: '/trading/super-order', icon: DocumentDuplicateIcon, status: 'beta' },
+      { name: 'Forever Order', href: '/trading/forever-order', icon: ClockIcon, status: 'beta' }
     ]
   },
   {
@@ -111,7 +130,18 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate }) => {
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Portfolio']);
+  // Initialize with consistent empty state to avoid hydration mismatch
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Set default expanded items after component mounts (client-side only)
+  useEffect(() => {
+    setIsHydrated(true);
+    // Small delay to ensure hydration is complete
+    setTimeout(() => {
+      setExpandedItems(['Portfolio']);
+    }, 0);
+  }, []);
 
   const toggleExpanded = (itemName: string) => {
     setExpandedItems(prev => 
@@ -122,27 +152,54 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate }) => {
   };
 
   const getStatusColor = (status?: string) => {
+    // Return consistent classes for SSR/CSR
     switch (status) {
-      case 'active': return 'text-green-600';
-      case 'beta': return 'text-blue-600';
-      case 'coming-soon': return 'text-gray-400';
-      default: return 'text-gray-600';
+      case 'active':
+        return 'text-green-600';
+      case 'beta':
+        return 'text-blue-600';
+      case 'coming-soon':
+        return 'text-gray-400';
+      default:
+        return 'text-gray-600';
     }
   };
 
   const getStatusBadge = (status?: string) => {
-    switch (status) {
-      case 'beta': return <span className="ml-2 px-1.5 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">Beta</span>;
-      case 'coming-soon': return <span className="ml-2 px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">Soon</span>;
-      default: return null;
+    if (status === 'beta') {
+      return <span className="ml-2 px-1.5 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">Beta</span>;
     }
+    if (status === 'coming-soon') {
+      return <span className="ml-2 px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">Soon</span>;
+    }
+    return null;
   };
 
   const renderNavigationItem = (item: NavigationItem, level = 0) => {
-    const isExpanded = expandedItems.includes(item.name);
-    const hasChildren = item.children && item.children.length > 0;
+    // Only use expanded state after hydration to avoid mismatch
+    const isExpanded = isHydrated ? expandedItems.includes(item.name) : false;
+    const hasChildren = Boolean(item.children && item.children.length > 0);
     const isActive = item.href === currentPath;
     const isDisabled = item.status === 'coming-soon';
+    
+    // Build className strings deterministically to match server/client exactly
+    let buttonClassName = 'w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group';
+    
+    if (level > 0) {
+      buttonClassName += ' ml-4 pl-8';
+    }
+    
+    if (isActive) {
+      buttonClassName += ' bg-blue-50 text-blue-700 border-r-2 border-blue-700';
+    } else if (isDisabled && !hasChildren) {
+      buttonClassName += ' text-gray-400 cursor-not-allowed';
+    } else {
+      buttonClassName += ' text-gray-700 hover:bg-gray-50 hover:text-gray-900';
+    }
+    
+    // Build icon className deterministically
+    const iconColorClass = getStatusColor(item.status);
+    const iconClassName = `mr-3 h-5 w-5 ${iconColorClass}`;
 
     return (
       <div key={item.name}>
@@ -155,20 +212,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate }) => {
             }
           }}
           disabled={isDisabled && !hasChildren}
-          className={`
-            w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg
-            transition-all duration-200 group
-            ${level > 0 ? 'ml-4 pl-8' : ''}
-            ${isActive 
-              ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' 
-              : isDisabled && !hasChildren
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-            }
-          `}
+          className={buttonClassName}
+          suppressHydrationWarning
         >
           <div className="flex items-center">
-            <item.icon className={`mr-3 h-5 w-5 ${getStatusColor(item.status)}`} />
+            {item.icon ? (
+              <item.icon className={iconClassName} />
+            ) : (
+              <div className={iconClassName}>⚠️</div>
+            )}
             <span className={level > 0 ? 'text-sm' : ''}>{item.name}</span>
             {item.badge && (
               <span className="ml-2 px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded-full">
@@ -179,16 +231,17 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate }) => {
           </div>
           {hasChildren && (
             <div className="flex items-center">
-              {isExpanded ? (
-                <ChevronDownIcon className="h-4 w-4 text-gray-400" />
-              ) : (
-                <ChevronRightIcon className="h-4 w-4 text-gray-400" />
-              )}
+              {/* Always render ChevronRightIcon initially to avoid hydration mismatch */}
+              <ChevronRightIcon 
+                className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+                  isHydrated && isExpanded ? 'transform rotate-90' : ''
+                }`}
+              />
             </div>
           )}
         </button>
         
-        {hasChildren && isExpanded && (
+        {hasChildren && isExpanded && isHydrated && (
           <div className="mt-1 space-y-1">
             {item.children!.map(child => renderNavigationItem(child, level + 1))}
           </div>

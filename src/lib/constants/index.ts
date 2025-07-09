@@ -66,6 +66,7 @@ export const API_ENDPOINTS = {
   TRADING: {
     ORDERS: '/api/trading/orders',
     TRADES: '/api/trading/trades',
+    TRADES_BOOK: '/api/trading/trades-book',
     FUNDS: '/api/trading/funds',
     LEDGER: '/api/trading/ledger',
   },

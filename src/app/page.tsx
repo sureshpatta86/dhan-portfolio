@@ -9,6 +9,7 @@ import { ConvertPosition } from '@/components/ConvertPosition';
 import TradersControl from '@/components/TradersControl';
 import Funds from '@/components/Funds';
 import { Statements } from '@/components/Statements';
+import Orders from '@/components/Orders';
 
 const HomePage: React.FC = () => {
     const [currentPath, setCurrentPath] = useState('/');
@@ -27,6 +28,35 @@ const HomePage: React.FC = () => {
                 return <Positions />;
             case '/portfolio/convert':
                 return <ConvertPosition />;
+            case '/trading/orders':
+                return (
+                    <div className="p-6">
+                        <div className="mb-6">
+                            <h1 className="text-2xl font-bold text-gray-900">Trading Orders</h1>
+                            <p className="text-gray-600 mt-1">
+                                Manage your orders, place new trades, and monitor order status
+                            </p>
+                        </div>
+                        <Orders />
+                    </div>
+                );
+            case '/trading/trades':
+                return (
+                    <div className="p-6">
+                        <div className="mb-6">
+                            <h1 className="text-2xl font-bold text-gray-900">Trade Book</h1>
+                            <p className="text-gray-600 mt-1">
+                                Your executed trades and transaction history
+                            </p>
+                        </div>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-blue-800 mb-2">Trade Book Feature</h3>
+                            <p className="text-blue-600">
+                                The trade book will show your executed trades once you start trading through the orders section.
+                            </p>
+                        </div>
+                    </div>
+                );
             case '/funds':
                 return <Funds />;
             case '/reports/statements':
