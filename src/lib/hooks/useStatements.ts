@@ -14,6 +14,7 @@ export function useLedger({ fromDate, toDate, autoFetch = false }: UseLedgerOpti
   const [error, setError] = useState<string | null>(null);
 
   const fetchLedger = async (from?: string, to?: string) => {
+    console.log('fetchLedger called with:', { from, to });
     if (!from || !to) {
       setError('Both from-date and to-date are required');
       return;
@@ -27,14 +28,18 @@ export function useLedger({ fromDate, toDate, autoFetch = false }: UseLedgerOpti
         `/api/trading/ledger?from-date=${from}&to-date=${to}`
       );
 
+      console.log('Ledger API response status:', response.status);
+
       if (!response.ok) {
         throw new Error('Failed to fetch ledger data');
       }
 
       const apiResponse = await response.json();
+      console.log('Ledger API response:', apiResponse);
       // Extract the data array from the API response
       setLedgerData(Array.isArray(apiResponse.data) ? apiResponse.data : []);
     } catch (err) {
+      console.error('Ledger fetch error:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch ledger data');
       setLedgerData([]);
     } finally {
@@ -43,7 +48,9 @@ export function useLedger({ fromDate, toDate, autoFetch = false }: UseLedgerOpti
   };
 
   useEffect(() => {
+    console.log('useLedger useEffect triggered:', { autoFetch, fromDate, toDate });
     if (autoFetch && fromDate && toDate) {
+      console.log('Calling fetchLedger...');
       fetchLedger(fromDate, toDate);
     }
   }, [fromDate, toDate, autoFetch]);
