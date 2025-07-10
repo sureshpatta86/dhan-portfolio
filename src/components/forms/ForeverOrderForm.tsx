@@ -8,6 +8,7 @@
 
 import React, { useState } from 'react';
 import { usePlaceForeverOrder } from '@/features/trading/hooks';
+import { DHAN_CONFIG } from '@/lib/config/app';
 import type { 
   PlaceForeverOrderRequest, 
   TransactionType, 
@@ -18,16 +19,13 @@ import type {
   ForeverOrderFlag 
 } from '@/features/trading/types';
 
-// Default client ID
-const DEFAULT_CLIENT_ID = '1101648848';
-
 interface ForeverOrderFormProps {
   onOrderPlaced?: () => void;
 }
 
 export const ForeverOrderForm: React.FC<ForeverOrderFormProps> = ({ onOrderPlaced }) => {
   const [formData, setFormData] = useState<Partial<PlaceForeverOrderRequest>>({
-    dhanClientId: DEFAULT_CLIENT_ID,
+    dhanClientId: DHAN_CONFIG.publicClientId || '',
     orderFlag: 'SINGLE',
     transactionType: 'BUY',
     exchangeSegment: 'NSE_EQ',
@@ -104,7 +102,7 @@ export const ForeverOrderForm: React.FC<ForeverOrderFormProps> = ({ onOrderPlace
       
       // Reset form
       setFormData({
-        dhanClientId: DEFAULT_CLIENT_ID,
+        dhanClientId: DHAN_CONFIG.publicClientId || '',
         orderFlag: 'SINGLE',
         transactionType: 'BUY',
         exchangeSegment: 'NSE_EQ',

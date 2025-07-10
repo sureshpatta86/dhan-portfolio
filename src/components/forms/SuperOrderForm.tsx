@@ -24,7 +24,7 @@ interface SuperOrderFormProps {
 
 export const SuperOrderForm: React.FC<SuperOrderFormProps> = ({ onSuccess, onCancel }) => {
   const [formData, setFormData] = useState<PlaceSuperOrderRequest>({
-    dhanClientId: DHAN_CONFIG.clientId || '',
+    dhanClientId: DHAN_CONFIG.publicClientId || '',
     transactionType: 'BUY' as TransactionType,
     exchangeSegment: 'NSE_EQ' as ExchangeSegment,
     productType: 'CNC' as ProductType,
@@ -41,7 +41,7 @@ export const SuperOrderForm: React.FC<SuperOrderFormProps> = ({ onSuccess, onCan
   const placeSuperOrderMutation = usePlaceSuperOrder();
 
   // Show a message if client ID is not configured
-  if (!DHAN_CONFIG.clientId) {
+  if (!DHAN_CONFIG.publicClientId) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="text-center py-8">

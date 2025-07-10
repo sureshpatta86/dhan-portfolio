@@ -10,26 +10,49 @@ import TradersControl from '@/components/TradersControl';
 import Funds from '@/components/Funds';
 import { Statements } from '@/components/Statements';
 import Orders from '@/components/Orders';
+import { OrderDashboard } from '@/components/OrderDashboard';
+import { OrderBook } from '@/components/OrderBook';
+import { PlaceOrderForm } from '@/components/forms/PlaceOrderForm';
+import { OrderEditForm } from '@/components/forms/OrderEditForm';
 import SuperOrders from '@/components/SuperOrderBook';
+import { SuperOrderDashboard } from '@/components/SuperOrderDashboard';
+import { SuperOrderForm } from '@/components/forms/SuperOrderForm';
+import { ModifySuperOrderForm } from '@/components/forms/ModifySuperOrderForm';
 import { ForeverOrderDashboard } from '@/components/ForeverOrderDashboard';
 import { ForeverOrderBook } from '@/components/ForeverOrderBook';
 import { ForeverOrderForm } from '@/components/forms/ForeverOrderForm';
 import { ForeverOrderEditForm } from '@/components/forms/ForeverOrderEditForm';
-import type { DhanForeverOrder } from '@/features/trading/types';
+import type { DhanForeverOrder, DhanSuperOrder, DhanOrder } from '@/features/trading/types';
 
 const HomePage: React.FC = () => {
     const [currentPath, setCurrentPath] = useState('/');
     const [foreverOrderTab, setForeverOrderTab] = useState<'dashboard' | 'place' | 'book'>('dashboard');
+    const [superOrderTab, setSuperOrderTab] = useState<'dashboard' | 'place' | 'book'>('dashboard');
+    const [orderTab, setOrderTab] = useState<'dashboard' | 'place' | 'book'>('dashboard');
     const [orderToModify, setOrderToModify] = useState<DhanForeverOrder | null>(null);
+    const [superOrderToModify, setSuperOrderToModify] = useState<DhanSuperOrder | null>(null);
+    const [regularOrderToModify, setRegularOrderToModify] = useState<DhanOrder | null>(null);
     const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+    const [isSuperEditFormOpen, setIsSuperEditFormOpen] = useState(false);
+    const [isOrderEditFormOpen, setIsOrderEditFormOpen] = useState(false);
 
     const handleNavigate = (path: string) => {
         setCurrentPath(path);
-        // Reset forever order state when navigating away
+        // Reset state when navigating away
         if (path !== '/trading/forever-order') {
             setForeverOrderTab('dashboard');
             setOrderToModify(null);
             setIsEditFormOpen(false);
+        }
+        if (path !== '/trading/super-order') {
+            setSuperOrderTab('dashboard');
+            setSuperOrderToModify(null);
+            setIsSuperEditFormOpen(false);
+        }
+        if (path !== '/trading/orders') {
+            setOrderTab('dashboard');
+            setRegularOrderToModify(null);
+            setIsOrderEditFormOpen(false);
         }
     };
 
@@ -59,6 +82,58 @@ const HomePage: React.FC = () => {
         setForeverOrderTab('dashboard');
     };
 
+    // Super Order event handlers
+    const handleSuperOrderPlaced = () => {
+        setSuperOrderTab('dashboard');
+    };
+
+    const handleSuperOrderSelect = (order: DhanSuperOrder) => {
+        // Handle order selection if needed
+        console.log('Selected super order:', order);
+    };
+
+    const handleSuperOrderModify = (order: DhanSuperOrder) => {
+        setSuperOrderToModify(order);
+        setIsSuperEditFormOpen(true);
+    };
+
+    const handleSuperEditFormClose = () => {
+        setSuperOrderToModify(null);
+        setIsSuperEditFormOpen(false);
+    };
+
+    const handleSuperEditFormSuccess = () => {
+        setSuperOrderToModify(null);
+        setIsSuperEditFormOpen(false);
+        setSuperOrderTab('dashboard');
+    };
+
+    // Regular Order event handlers
+    const handleOrderPlaced = () => {
+        setOrderTab('dashboard');
+    };
+
+    const handleOrderSelect = (order: DhanOrder) => {
+        // Handle order selection if needed
+        console.log('Selected order:', order);
+    };
+
+    const handleOrderModify = (order: DhanOrder) => {
+        setRegularOrderToModify(order);
+        setIsOrderEditFormOpen(true);
+    };
+
+    const handleOrderEditFormClose = () => {
+        setRegularOrderToModify(null);
+        setIsOrderEditFormOpen(false);
+    };
+
+    const handleOrderEditFormSuccess = () => {
+        setRegularOrderToModify(null);
+        setIsOrderEditFormOpen(false);
+        setOrderTab('dashboard');
+    };
+
     const renderContent = () => {
         switch (currentPath) {
             case '/':
@@ -78,7 +153,63 @@ const HomePage: React.FC = () => {
                                 Manage your orders, place new trades, and monitor order status
                             </p>
                         </div>
-                        <Orders />
+
+                        {/* Order Tabs */}
+                        <div className="bg-white rounded-lg shadow">
+                            {/* Tab Headers */}
+                            <div className="border-b border-gray-200">
+                                <nav className="flex space-x-8 px-6" aria-label="Tabs">
+                                    {[
+                                        { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+                                        { id: 'place', label: 'Place Order', icon: '➕' },
+                                        { id: 'book', label: 'Order Book', icon: '📋' }
+                                    ].map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setOrderTab(tab.id as 'dashboard' | 'place' | 'book')}
+                                            className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center space-x-2 ${
+                                                orderTab === tab.id
+                                                    ? 'border-green-500 text-green-600'
+                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            <span>{tab.icon}</span>
+                                            <span>{tab.label}</span>
+                                        </button>
+                                    ))}
+                                </nav>
+                            </div>
+
+                            {/* Tab Content */}
+                            <div className="min-h-[500px]">
+                                {orderTab === 'dashboard' && (
+                                    <OrderDashboard 
+                                        onCreateNew={() => setOrderTab('place')}
+                                        onViewAll={() => setOrderTab('book')}
+                                    />
+                                )}
+                                {orderTab === 'place' && (
+                                    <PlaceOrderForm onOrderPlaced={handleOrderPlaced} />
+                                )}
+                                {orderTab === 'book' && (
+                                    <OrderBook 
+                                        onOrderSelect={handleOrderSelect}
+                                        onOrderModify={handleOrderModify}
+                                        onCreateNew={() => setOrderTab('place')}
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Edit Form Modal */}
+                        {isOrderEditFormOpen && regularOrderToModify && (
+                            <OrderEditForm 
+                                order={regularOrderToModify}
+                                isOpen={isOrderEditFormOpen}
+                                onCloseAction={handleOrderEditFormClose}
+                                onSuccessAction={handleOrderEditFormSuccess}
+                            />
+                        )}
                     </div>
                 );
             case '/trading/trades':
@@ -102,12 +233,82 @@ const HomePage: React.FC = () => {
                 return (
                     <div className="p-6">
                         <div className="mb-6">
-                            <h1 className="text-2xl font-bold text-gray-900">Trading Orders</h1>
+                            <h1 className="text-2xl font-bold text-gray-900">Super Orders</h1>
                             <p className="text-gray-600 mt-1">
-                                Manage your Super orders, place new trades, and monitor order status
+                                Advanced conditional orders with multiple legs and strategies
                             </p>
                         </div>
-                        <SuperOrders />
+
+                        {/* Super Order Tabs */}
+                        <div className="bg-white rounded-lg shadow">
+                            {/* Tab Headers */}
+                            <div className="border-b border-gray-200">
+                                <nav className="flex space-x-8 px-6" aria-label="Tabs">
+                                    {[
+                                        { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+                                        { id: 'place', label: 'Place Order', icon: '➕' },
+                                        { id: 'book', label: 'Order Book', icon: '📋' }
+                                    ].map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setSuperOrderTab(tab.id as 'dashboard' | 'place' | 'book')}
+                                            className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center space-x-2 ${
+                                                superOrderTab === tab.id
+                                                    ? 'border-blue-500 text-blue-600'
+                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            <span>{tab.icon}</span>
+                                            <span>{tab.label}</span>
+                                        </button>
+                                    ))}
+                                </nav>
+                            </div>
+
+                            {/* Tab Content */}
+                            <div className="min-h-[500px]">
+                                {superOrderTab === 'dashboard' && (
+                                    <SuperOrderDashboard 
+                                        onCreateNew={() => setSuperOrderTab('place')}
+                                        onViewAll={() => setSuperOrderTab('book')}
+                                    />
+                                )}
+                                {superOrderTab === 'place' && (
+                                    <SuperOrderForm onSuccess={(orderId) => handleSuperOrderPlaced()} />
+                                )}
+                                {superOrderTab === 'book' && (
+                                    <SuperOrders 
+                                        onOrderSelect={handleSuperOrderSelect}
+                                        onOrderModify={handleSuperOrderModify}
+                                        onCreateNew={() => setSuperOrderTab('place')}
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Edit Form Modal */}
+                        {isSuperEditFormOpen && superOrderToModify && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                                    <div className="flex items-center justify-between p-4 border-b">
+                                        <h3 className="text-lg font-semibold">Edit Super Order</h3>
+                                        <button
+                                            onClick={handleSuperEditFormClose}
+                                            className="text-gray-400 hover:text-gray-600"
+                                        >
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <ModifySuperOrderForm 
+                                        order={superOrderToModify}
+                                        onSuccess={handleSuperEditFormSuccess}
+                                        onCancel={handleSuperEditFormClose}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 );
             case '/trading/forever-order':
