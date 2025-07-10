@@ -73,6 +73,8 @@ export const API_ENDPOINTS = {
     LEDGER: '/api/trading/ledger',
     // Super Order endpoints
     SUPER_ORDERS: '/api/trading/super-orders',
+    // Forever Order endpoints
+    FOREVER_ORDERS: '/api/trading/forever-orders',
   },
   
   // Market

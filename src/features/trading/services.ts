@@ -16,7 +16,12 @@ import type {
   PlaceSuperOrderRequest,
   ModifySuperOrderRequest,
   DhanSuperOrder,
-  SuperOrderResponse
+  SuperOrderResponse,
+  // Forever Order types
+  PlaceForeverOrderRequest,
+  ModifyForeverOrderRequest,
+  DhanForeverOrder,
+  ForeverOrderResponse
 } from './types';
 
 export class TradingService {
@@ -183,6 +188,46 @@ export class TradingService {
   static async getSuperOrderBook(): Promise<DhanSuperOrder[]> {
     const response = await internalApiClient.get<{ success: boolean; data: DhanSuperOrder[]; count: number }>(
       API_ENDPOINTS.TRADING.SUPER_ORDERS
+    );
+    return response.data?.data || [];
+  }
+
+  // Forever Order Management Services
+  static async placeForeverOrder(orderData: PlaceForeverOrderRequest): Promise<ForeverOrderResponse> {
+    const response = await internalApiClient.post<ForeverOrderResponse>(
+      API_ENDPOINTS.TRADING.FOREVER_ORDERS,
+      orderData
+    );
+    if (!response.data) {
+      throw new Error('Failed to place forever order - no response data');
+    }
+    return response.data;
+  }
+
+  static async modifyForeverOrder(modifyData: ModifyForeverOrderRequest): Promise<ForeverOrderResponse> {
+    const response = await internalApiClient.put<ForeverOrderResponse>(
+      `${API_ENDPOINTS.TRADING.FOREVER_ORDERS}/${modifyData.orderId}`,
+      modifyData
+    );
+    if (!response.data) {
+      throw new Error('Failed to modify forever order - no response data');
+    }
+    return response.data;
+  }
+
+  static async cancelForeverOrder(orderId: string): Promise<ForeverOrderResponse> {
+    const response = await internalApiClient.delete<ForeverOrderResponse>(
+      `${API_ENDPOINTS.TRADING.FOREVER_ORDERS}/${orderId}`
+    );
+    if (!response.data) {
+      throw new Error('Failed to cancel forever order - no response data');
+    }
+    return response.data;
+  }
+
+  static async getForeverOrderBook(): Promise<DhanForeverOrder[]> {
+    const response = await internalApiClient.get<{ success: boolean; data: DhanForeverOrder[]; count: number }>(
+      API_ENDPOINTS.TRADING.FOREVER_ORDERS
     );
     return response.data?.data || [];
   }
