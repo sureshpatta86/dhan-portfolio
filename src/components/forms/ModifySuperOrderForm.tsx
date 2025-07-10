@@ -32,7 +32,7 @@ export const ModifySuperOrderForm: React.FC<ModifySuperOrderFormProps> = ({
   onCreateNew
 }) => {
   const [formData, setFormData] = useState<ModifySuperOrderRequest>({
-    dhanClientId: DHAN_CONFIG.clientId || '',
+    dhanClientId: DHAN_CONFIG.publicClientId || '',
     orderId: order.orderId,
     legName: 'ENTRY_LEG' as LegName,
     orderType: order.orderType as OrderType,
