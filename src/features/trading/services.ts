@@ -31,19 +31,37 @@ import type {
 
 export class TradingService {
   static async getFunds(): Promise<DhanFunds> {
-    const response = await internalApiClient.get<{ success: boolean; data: DhanFunds; count: number }>(
-      API_ENDPOINTS.TRADING.FUNDS
-    );
-    return response.data?.data || {
-      dhanClientId: '',
-      availabelBalance: 0,
-      sodLimit: 0,
-      collateralAmount: 0,
-      receiveableAmount: 0,
-      utilizedAmount: 0,
-      blockedPayoutAmount: 0,
-      withdrawableBalance: 0,
-    };
+    console.log('TradingService.getFunds called');
+    console.log('API endpoint:', API_ENDPOINTS.TRADING.FUNDS);
+    
+    try {
+      const response = await internalApiClient.get<{ success: boolean; data: DhanFunds; count: number }>(
+        API_ENDPOINTS.TRADING.FUNDS
+      );
+      
+      console.log('TradingService.getFunds response:', response);
+      console.log('TradingService.getFunds response.data:', response.data);
+      
+      // The API returns the data wrapped in a success response
+      const apiResponse = response as unknown as { success: boolean; data: DhanFunds; count: number };
+      
+      const result = apiResponse.data || {
+        dhanClientId: '',
+        availabelBalance: 0,
+        sodLimit: 0,
+        collateralAmount: 0,
+        receiveableAmount: 0,
+        utilizedAmount: 0,
+        blockedPayoutAmount: 0,
+        withdrawableBalance: 0,
+      };
+      
+      console.log('TradingService.getFunds returning:', result);
+      return result;
+    } catch (error) {
+      console.error('TradingService.getFunds error:', error);
+      throw error;
+    }
   }
 
   static async getLedger(fromDate?: string, toDate?: string): Promise<DhanLedger[]> {

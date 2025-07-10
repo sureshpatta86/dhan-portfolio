@@ -27,11 +27,16 @@ export const tradingQueryKeys = {
 };
 
 export function useFunds() {
-  return useQuery({
+  const result = useQuery({
     queryKey: tradingQueryKeys.funds(),
     queryFn: TradingService.getFunds,
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
+  
+  console.log('useFunds hook result:', result);
+  console.log('useFunds queryKey:', tradingQueryKeys.funds());
+  
+  return result;
 }
 
 export function useLedger(fromDate?: string, toDate?: string) {
