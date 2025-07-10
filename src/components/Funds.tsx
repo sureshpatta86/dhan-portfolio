@@ -172,6 +172,11 @@ export default function Funds() {
   const { addToast } = useToast();
   const [showSensitive, setShowSensitive] = useState(true);
 
+  // Debug logging
+  console.log('Funds component rendering - isLoading:', isLoading);
+  console.log('Funds component rendering - error:', error);
+  console.log('Funds component rendering - fundsData:', fundsData);
+
   const funds = fundsData || {
     dhanClientId: "",
     availabelBalance: 0,
