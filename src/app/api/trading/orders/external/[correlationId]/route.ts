@@ -26,11 +26,11 @@ function GET_DHAN_API_CONFIG() {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { correlationId: string } }
+  { params }: { params: Promise<{ correlationId: string }> }
 ) {
   try {
     const { accessToken, baseUrl } = GET_DHAN_API_CONFIG();
-    const { correlationId } = params;
+    const { correlationId } = await params;
     
     if (!accessToken) {
       return NextResponse.json(

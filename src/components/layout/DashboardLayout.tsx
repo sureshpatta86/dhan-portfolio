@@ -75,7 +75,7 @@ const navigation: NavigationItem[] = [
       { name: 'Place Order', href: '/trading/orders', icon: ShoppingCartIcon, status: 'active' },
       { name: 'Orders', href: '/trading/orders', icon: DocumentDuplicateIcon, status: 'active' },
       { name: 'Trade Book', href: '/trading/trades', icon: DocumentDuplicateIcon, status: 'active' },
-      { name: 'Super Order', href: '/trading/super-order', icon: DocumentDuplicateIcon, status: 'beta' },
+      { name: 'Super Order', href: '/trading/super-order', icon: DocumentDuplicateIcon, status: 'active' },
       { name: 'Forever Order', href: '/trading/forever-order', icon: ClockIcon, status: 'beta' }
     ]
   },

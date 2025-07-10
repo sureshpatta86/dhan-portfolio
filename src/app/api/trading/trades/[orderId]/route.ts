@@ -26,11 +26,11 @@ function GET_DHAN_API_CONFIG() {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
     const { accessToken, baseUrl } = GET_DHAN_API_CONFIG();
-    const { orderId } = params;
+    const { orderId } = await params;
     
     if (!accessToken) {
       return NextResponse.json(

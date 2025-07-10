@@ -10,6 +10,7 @@ import TradersControl from '@/components/TradersControl';
 import Funds from '@/components/Funds';
 import { Statements } from '@/components/Statements';
 import Orders from '@/components/Orders';
+import SuperOrders from '@/components/SuperOrderBook';
 
 const HomePage: React.FC = () => {
     const [currentPath, setCurrentPath] = useState('/');
@@ -55,6 +56,18 @@ const HomePage: React.FC = () => {
                                 The trade book will show your executed trades once you start trading through the orders section.
                             </p>
                         </div>
+                    </div>
+                );
+                case '/trading/super-order':
+                return (
+                    <div className="p-6">
+                        <div className="mb-6">
+                            <h1 className="text-2xl font-bold text-gray-900">Trading Orders</h1>
+                            <p className="text-gray-600 mt-1">
+                                Manage your Super orders, place new trades, and monitor order status
+                            </p>
+                        </div>
+                        <SuperOrders />
                     </div>
                 );
             case '/funds':
