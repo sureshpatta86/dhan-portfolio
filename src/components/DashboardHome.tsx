@@ -17,6 +17,8 @@ import { useHoldings, usePositions } from '@/features/portfolio';
 import type { DhanHolding, DhanPosition } from '@/features/portfolio/types';
 import { LoadingSkeleton } from '@/lib/components/ui/LoadingStates';
 import { useTradersControlStore } from '@/lib/store/tradersControl';
+import MarketStatusIndicator from '@/components/MarketStatusIndicator';
+import HolidayWidget from '@/components/HolidayWidget';
 
 interface StatsCardProps {
   title: string;
@@ -288,8 +290,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ onNavigate }) => {
           </div>
         </div>
         <div className="mt-6 flex items-center text-blue-100">
-          <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-          <span className="text-sm">Market is open • Last updated: Just now</span>
+          <MarketStatusIndicator compact={true} heroMode={true} />
         </div>
       </div>
 
@@ -310,6 +311,17 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ onNavigate }) => {
           {quickActions.map((action, index) => (
             <QuickAction key={index} {...action} />
           ))}
+        </div>
+      </div>
+
+      {/* Market Information */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Market Information</h2>
+          <HolidayWidget />
+        </div>
+        <div className="lg:col-span-1">
+          {/* You can add more widgets here in the future */}
         </div>
       </div>
 
@@ -354,15 +366,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ onNavigate }) => {
       </div>
 
       {/* Market Status Banner */}
-      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-        <div className="flex items-center">
-          <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-          <div>
-            <p className="text-green-800 font-medium">Market is Open</p>
-            <p className="text-green-600 text-sm">NSE & BSE are currently active for trading</p>
-          </div>
-        </div>
-      </div>
+      <MarketStatusIndicator showDetails={true} />
     </div>
   );
 };

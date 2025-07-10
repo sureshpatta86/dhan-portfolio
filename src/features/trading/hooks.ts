@@ -3,7 +3,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { TradingService } from './services';
+import { TradingService, getOptionChain, getExpiryList } from './services';
 import type { PlaceOrderRequest, ModifyOrderRequest, PlaceSuperOrderRequest, ModifySuperOrderRequest, PlaceForeverOrderRequest, ModifyForeverOrderRequest } from './types';
 
 // Query keys for React Query
@@ -289,3 +289,44 @@ export function useCancelForeverOrder() {
     },
   });
 }
+
+/**
+ * Hook to fetch option chain data
+ */
+export const useOptionChain = (
+  underlyingScrip: number,
+  underlyingSeg: string,
+  expiry: string,
+  enabled: boolean = true
+) => {
+  return useQuery({
+    queryKey: ['optionChain', underlyingScrip, underlyingSeg, expiry],
+    queryFn: () => getOptionChain({
+      UnderlyingScrip: underlyingScrip,
+      UnderlyingSeg: underlyingSeg,
+      Expiry: expiry
+    }),
+    enabled: enabled && !!underlyingScrip && !!underlyingSeg && !!expiry,
+    staleTime: 3000, // 3 seconds as per API rate limit
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
+  });
+};
+
+/**
+ * Hook to fetch expiry list for an underlying
+ */
+export const useExpiryList = (
+  underlyingScrip: number,
+  underlyingSeg: string,
+  enabled: boolean = true
+) => {
+  return useQuery({
+    queryKey: ['expiryList', underlyingScrip, underlyingSeg],
+    queryFn: () => getExpiryList({
+      UnderlyingScrip: underlyingScrip,
+      UnderlyingSeg: underlyingSeg
+    }),
+    enabled: enabled && !!underlyingScrip && !!underlyingSeg,
+    staleTime: 1000 * 60 * 5, // 5 minutes (expiry dates don't change frequently)
+  });
+};

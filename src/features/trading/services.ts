@@ -21,7 +21,12 @@ import type {
   PlaceForeverOrderRequest,
   ModifyForeverOrderRequest,
   DhanForeverOrder,
-  ForeverOrderResponse
+  ForeverOrderResponse,
+  // Option Chain types
+  OptionChainRequest,
+  OptionChainResponse,
+  ExpiryListRequest,
+  ExpiryListResponse
 } from './types';
 
 export class TradingService {
@@ -231,4 +236,34 @@ export class TradingService {
     );
     return response.data?.data || [];
   }
+
+  /**
+   * Get Option Chain data for a specific underlying and expiry
+   */
+  static async getOptionChain(request: OptionChainRequest): Promise<OptionChainResponse> {
+    try {
+      const response = await internalApiClient.post<OptionChainResponse>('/api/trading/option-chain', request);
+      return response.data!;
+    } catch (error) {
+      console.error('Error fetching option chain:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get expiry list for a specific underlying
+   */
+  static async getExpiryList(request: ExpiryListRequest): Promise<ExpiryListResponse> {
+    try {
+      const response = await internalApiClient.post<ExpiryListResponse>('/api/trading/option-chain/expiry-list', request);
+      return response.data!;
+    } catch (error) {
+      console.error('Error fetching expiry list:', error);
+      throw error;
+    }
+  }
 }
+
+// Export standalone functions for convenience
+export const getOptionChain = (request: OptionChainRequest) => TradingService.getOptionChain(request);
+export const getExpiryList = (request: ExpiryListRequest) => TradingService.getExpiryList(request);

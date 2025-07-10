@@ -20,7 +20,8 @@ import {
   DocumentDuplicateIcon,
   BellIcon,
   ChevronDownIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 
 // Debug: Check if all icons are properly imported
@@ -88,13 +89,14 @@ const navigation: NavigationItem[] = [
   {
     name: 'Market Data',
     icon: GlobeAltIcon,
-    status: 'coming-soon',
+    status: 'active',
     children: [
+      { name: 'Option Chain', href: '/market/option-chain', icon: CubeIcon, status: 'active' },
+      { name: 'Market Holidays', href: '/market-holidays', icon: CalendarIcon, status: 'active' },
       { name: 'Market Quote', href: '/market/quote', icon: SignalIcon, status: 'coming-soon' },
       { name: 'Live Feed', href: '/market/live-feed', icon: SignalIcon, status: 'coming-soon', badge: 'Real-time' },
       { name: 'Market Depth', href: '/market/depth', icon: ChartBarIcon, status: 'coming-soon' },
-      { name: 'Historical Data', href: '/market/historical', icon: DocumentChartBarIcon, status: 'coming-soon' },
-      { name: 'Option Chain', href: '/market/option-chain', icon: CubeIcon, status: 'coming-soon' }
+      { name: 'Historical Data', href: '/market/historical', icon: DocumentChartBarIcon, status: 'coming-soon' }
     ]
   },
   {
