@@ -47,6 +47,8 @@ export class TradingService {
   }
 
   static async getLedger(fromDate?: string, toDate?: string): Promise<DhanLedger[]> {
+    console.log('TradingService.getLedger called with:', { fromDate, toDate });
+    
     // Default to last 30 days if no dates provided
     const defaultToDate = new Date().toISOString().split('T')[0];
     const defaultFromDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -54,8 +56,13 @@ export class TradingService {
     const from = fromDate || defaultFromDate;
     const to = toDate || defaultToDate;
     
+    console.log('Making request to:', `${API_ENDPOINTS.TRADING.LEDGER}?from-date=${from}&to-date=${to}`);
+    
     const endpoint = `${API_ENDPOINTS.TRADING.LEDGER}?from-date=${from}&to-date=${to}`;
     const response = await internalApiClient.get<{ success: boolean; data: DhanLedger[]; count: number }>(endpoint);
+    
+    console.log('Ledger response:', response.data);
+    
     return response.data?.data || [];
   }
 

@@ -1,9 +1,14 @@
 function GET_DHAN_API_CONFIG() {
   const accessToken = process.env.DHAN_ACCESS_TOKEN || "";
+  const clientId = process.env.DHAN_CLIENT_ID || "";
   const baseUrl = process.env.DHAN_BASE_URL || "";
 
   if (!accessToken) {
     throw new Error("Access token is required");
+  }
+
+  if (!clientId) {
+    throw new Error("Client ID is required");
   }
 
   if (!baseUrl) {
@@ -12,6 +17,7 @@ function GET_DHAN_API_CONFIG() {
 
   return {
     accessToken,
+    clientId,
     baseUrl,
   };
 }
@@ -20,11 +26,21 @@ export async function GET(request: Request) {
   try {
     // Get Dhan API configuration
     console.log("Fetching ledger from Dhan API");
-    const { accessToken, baseUrl } = GET_DHAN_API_CONFIG();
+    const { accessToken, clientId, baseUrl } = GET_DHAN_API_CONFIG();
     
     if (!accessToken) {
       return new Response(
         JSON.stringify({ error: "Access token is required" }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    if (!clientId) {
+      return new Response(
+        JSON.stringify({ error: "Client ID is required" }),
         {
           status: 401,
           headers: { "Content-Type": "application/json" },
@@ -61,7 +77,8 @@ export async function GET(request: Request) {
     const options = {
       method: "GET",
       headers: { 
-        "access-token": accessToken, 
+        "access-token": accessToken,
+        "client-id": clientId,
         Accept: "application/json",
         "Content-Type": "application/json"
       },

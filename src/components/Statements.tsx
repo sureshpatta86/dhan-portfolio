@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLedger } from '@/features/trading';
+import { useLedger } from '@/lib/hooks/useStatements';
 import { useTradeHistory } from '@/lib/hooks';
 import { LoadingSpinner } from '@/lib/components/ui/LoadingStates';
 import type { LedgerEntry, TradeHistoryEntry } from '@/lib/types';
@@ -349,11 +349,12 @@ export function Statements() {
   const [tradesToDate, setTradesToDate] = useState(today);
 
   const {
-    data: ledgerData,
+    ledgerData,
     isLoading: ledgerLoading,
     error: ledgerError,
-    refetch: fetchLedger,
-  } = useLedger(ledgerFromDate, ledgerToDate);
+    fetchLedger,
+    refetch,
+  } = useLedger({ fromDate: ledgerFromDate, toDate: ledgerToDate, autoFetch: true });
 
   const {
     tradeData,
@@ -425,7 +426,7 @@ export function Statements() {
             <LedgerTable
               data={ledgerData || []}
               isLoading={ledgerLoading}
-              error={ledgerError?.message || null}
+              error={ledgerError || null}
             />
           </div>
         </div>

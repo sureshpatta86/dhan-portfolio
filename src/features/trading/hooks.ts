@@ -35,11 +35,16 @@ export function useFunds() {
 }
 
 export function useLedger(fromDate?: string, toDate?: string) {
+  console.log('useLedger hook called with:', { fromDate, toDate, enabled: !!(fromDate && toDate) });
+  
   return useQuery({
     queryKey: [...tradingQueryKeys.ledger(), fromDate, toDate],
-    queryFn: () => TradingService.getLedger(fromDate, toDate),
+    queryFn: () => {
+      console.log('useLedger queryFn executing...');
+      return TradingService.getLedger(fromDate, toDate);
+    },
     staleTime: 1000 * 60 * 5, // 5 minutes
-    enabled: !!(fromDate && toDate), // Only enabled when both dates are provided
+    // enabled: !!(fromDate && toDate), // Temporarily disable this condition
   });
 }
 
