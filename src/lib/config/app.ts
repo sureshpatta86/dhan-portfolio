@@ -18,6 +18,7 @@ export const API_CONFIG = {
 export const DHAN_CONFIG = {
   baseUrl: process.env.DHAN_BASE_URL || 'https://api.dhan.co/v2',
   accessToken: process.env.DHAN_ACCESS_TOKEN,
+  clientId: process.env.DHAN_CLIENT_ID,
 } as const;
 
 export const DATABASE_CONFIG = {

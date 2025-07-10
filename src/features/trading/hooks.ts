@@ -4,7 +4,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { TradingService } from './services';
-import type { PlaceOrderRequest, ModifyOrderRequest } from './types';
+import type { PlaceOrderRequest, ModifyOrderRequest, PlaceSuperOrderRequest, ModifySuperOrderRequest } from './types';
 
 // Query keys for React Query
 export const tradingQueryKeys = {
@@ -18,6 +18,9 @@ export const tradingQueryKeys = {
   trades: () => [...tradingQueryKeys.all, 'trades'] as const,
   tradeBook: () => [...tradingQueryKeys.trades(), 'book'] as const,
   tradesByOrder: (orderId: string) => [...tradingQueryKeys.trades(), 'order', orderId] as const,
+  // Super Order query keys
+  superOrders: () => [...tradingQueryKeys.all, 'super-orders'] as const,
+  superOrderBook: () => [...tradingQueryKeys.superOrders(), 'book'] as const,
 };
 
 export function useFunds() {
@@ -40,12 +43,58 @@ export function useLedger(fromDate?: string, toDate?: string) {
 // Order Management Hooks
 
 export function useOrderBook() {
-  return useQuery({
-    queryKey: tradingQueryKeys.orderBook(),
-    queryFn: TradingService.getOrderBook,
-    staleTime: 1000 * 30, // 30 seconds
-    refetchInterval: 1000 * 30, // Auto-refresh every 30 seconds
+  console.log('useOrderBook hook called');
+  
+  // Check if we're in a QueryClient context
+  const queryClient = useQueryClient();
+  console.log('useOrderBook - QueryClient exists:', !!queryClient);
+  console.log('useOrderBook - QueryClient queries count:', queryClient.getQueryCache().getAll().length);
+  
+  const queryKey = tradingQueryKeys.orderBook();
+  console.log('useOrderBook - Query key:', queryKey);
+  
+  const query = useQuery({
+    queryKey,
+    queryFn: async () => {
+      console.log('useOrderBook: queryFn executing - START');
+      try {
+        // Use direct fetch instead of the service layer for debugging
+        const response = await fetch('/api/trading/orders');
+        console.log('useOrderBook: Direct fetch response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('useOrderBook: Direct fetch result:', result);
+        return result.data || [];
+      } catch (error) {
+        console.error('useOrderBook: queryFn executing - ERROR', error);
+        throw error;
+      }
+    },
+    staleTime: 0, // Always fetch for debugging
+    gcTime: 0, // Don't cache for debugging
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+    enabled: typeof window !== 'undefined', // Only run on client side
   });
+  
+  console.log('useOrderBook hook result:', {
+    data: query.data,
+    isLoading: query.isLoading,
+    error: query.error,
+    status: query.status,
+    dataUpdatedAt: query.dataUpdatedAt,
+    errorUpdatedAt: query.errorUpdatedAt,
+    fetchStatus: query.fetchStatus,
+    isStale: query.isStale,
+    isFetching: query.isFetching,
+  });
+  
+  return query;
 }
 
 export function useOrderDetails(orderId: string) {
@@ -135,6 +184,55 @@ export function usePlaceSlicedOrder() {
       // Invalidate order book and funds to refresh data
       queryClient.invalidateQueries({ queryKey: tradingQueryKeys.orderBook() });
       queryClient.invalidateQueries({ queryKey: tradingQueryKeys.funds() });
+    },
+  });
+}
+
+// Super Order Management Hooks
+
+export function useSuperOrderBook() {
+  return useQuery({
+    queryKey: tradingQueryKeys.superOrderBook(),
+    queryFn: TradingService.getSuperOrderBook,
+    staleTime: 1000 * 30, // 30 seconds
+    refetchInterval: 1000 * 30, // Auto-refresh every 30 seconds
+  });
+}
+
+export function usePlaceSuperOrder() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (orderData: PlaceSuperOrderRequest) => TradingService.placeSuperOrder(orderData),
+    onSuccess: () => {
+      // Invalidate super order book and funds to refresh data
+      queryClient.invalidateQueries({ queryKey: tradingQueryKeys.superOrderBook() });
+      queryClient.invalidateQueries({ queryKey: tradingQueryKeys.funds() });
+    },
+  });
+}
+
+export function useModifySuperOrder() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (modifyData: ModifySuperOrderRequest) => TradingService.modifySuperOrder(modifyData),
+    onSuccess: () => {
+      // Invalidate super order book
+      queryClient.invalidateQueries({ queryKey: tradingQueryKeys.superOrderBook() });
+    },
+  });
+}
+
+export function useCancelSuperOrder() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ orderId, legName = 'ENTRY_LEG' }: { orderId: string; legName?: string }) => 
+      TradingService.cancelSuperOrder(orderId, legName),
+    onSuccess: () => {
+      // Invalidate super order book
+      queryClient.invalidateQueries({ queryKey: tradingQueryKeys.superOrderBook() });
     },
   });
 }

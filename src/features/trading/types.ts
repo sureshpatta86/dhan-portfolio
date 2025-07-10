@@ -219,3 +219,104 @@ export interface OrderSliceResponse {
   count: number;
   message: string;
 }
+
+// Super Order types
+export interface PlaceSuperOrderRequest {
+  dhanClientId: string;
+  correlationId?: string;
+  transactionType: TransactionType;
+  exchangeSegment: ExchangeSegment;
+  productType: ProductType;
+  orderType: OrderType;
+  securityId: string;
+  quantity: number;
+  price: number;
+  targetPrice: number;
+  stopLossPrice: number;
+  trailingJump: number;
+}
+
+export interface ModifySuperOrderRequest {
+  dhanClientId: string;
+  orderId: string;
+  orderType?: OrderType;
+  legName: LegName;
+  quantity?: number;
+  price?: number;
+  targetPrice?: number;
+  stopLossPrice?: number;
+  trailingJump?: number;
+}
+
+export interface SuperOrderLegDetail {
+  orderId: string;
+  legName: LegName;
+  transactionType: TransactionType;
+  totalQuantity: number;
+  remainingQuantity: number;
+  triggeredQuantity: number;
+  price: number;
+  orderStatus: OrderStatus;
+  trailingJump: number;
+}
+
+export interface DhanSuperOrder {
+  dhanClientId: string;
+  orderId: string;
+  correlationId?: string;
+  orderStatus: OrderStatus;
+  transactionType: TransactionType;
+  exchangeSegment: ExchangeSegment;
+  productType: ProductType;
+  orderType: OrderType;
+  validity: OrderValidity;
+  tradingSymbol: string;
+  securityId: string;
+  quantity: number;
+  remainingQuantity: number;
+  ltp: number;
+  price: number;
+  afterMarketOrder: boolean;
+  legName: LegName;
+  exchangeOrderId: string;
+  createTime: string;
+  updateTime: string;
+  exchangeTime: string;
+  omsErrorDescription: string;
+  averageTradedPrice: number;
+  filledQty: number;
+  legDetails: SuperOrderLegDetail[];
+}
+
+export interface SuperOrderResponse {
+  orderId: string;
+  orderStatus: OrderStatus;
+}
+
+export interface PlaceSuperOrderResponse {
+  success: boolean;
+  endpoint: string;
+  data: SuperOrderResponse;
+  message: string;
+}
+
+export interface ModifySuperOrderResponse {
+  success: boolean;
+  endpoint: string;
+  data: SuperOrderResponse;
+  message: string;
+}
+
+export interface CancelSuperOrderResponse {
+  success: boolean;
+  endpoint: string;
+  data: SuperOrderResponse;
+  message: string;
+}
+
+export interface SuperOrderBookResponse {
+  success: boolean;
+  endpoint: string;
+  data: DhanSuperOrder[];
+  count: number;
+}

@@ -21,6 +21,8 @@ export const ROUTES = {
   TRADING: '/trading',
   ORDERS: '/trading/orders',
   TRADES: '/trading/trades',
+  SUPER_ORDER: '/trading/super-order',
+  FOREVER_ORDER: '/trading/forever-order',
   
   // Market routes
   MARKET: '/market',
@@ -69,6 +71,8 @@ export const API_ENDPOINTS = {
     TRADES_BOOK: '/api/trading/trades-book',
     FUNDS: '/api/trading/funds',
     LEDGER: '/api/trading/ledger',
+    // Super Order endpoints
+    SUPER_ORDERS: '/api/trading/super-orders',
   },
   
   // Market
