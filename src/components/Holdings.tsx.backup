@@ -5,20 +5,89 @@ import { useHoldings } from '@/features/portfolio';
 import type { DhanHolding } from '@/features/portfolio/types';
 import { LoadingSkeleton } from '@/lib/components/ui/LoadingStates';
 import { useToast } from '@/lib/components/ui/ToastProvider';
-import { MagnifyingGlassIcon, BarsArrowUpIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, MinusIcon, ChevronUpDownIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { QuickTradeModal } from '@/components/common/QuickTradeModal';
-import type { TransactionType } from '@/features/trading/types';
 
-const HoldingsCard = ({ 
-  holding, 
-  onBuyMore, 
-  onSellExisting 
-}: { 
+// Define sorting options
+type SortOption = 'name' | 'value' | 'quantity' | 'avgPrice';
+type SortDirection = 'asc' | 'desc';
+
+const HoldingsCard = ({ holding, onBuyMore, onSellExisting }: { 
   holding: DhanHolding;
   onBuyMore: (holding: DhanHolding) => void;
   onSellExisting: (holding: DhanHolding) => void;
 }) => {
   const totalValue = holding.totalQty * holding.avgCostPrice;
+  
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all duration-300 transform hover:-translate-y-1 animate-fade-in">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+            {holding.tradingSymbol}
+          </h3>
+          <p className="text-sm text-gray-600">{holding.exchange}</p>
+          <p className="text-xs text-gray-500">ISIN: {holding.isin}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-lg font-bold text-gray-900">₹{holding.avgCostPrice.toFixed(2)}</p>
+          <p className="text-sm text-gray-600">Avg Price</p>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <p className="text-gray-600">Total Qty</p>
+          <p className="font-medium text-gray-900">{holding.totalQty}</p>
+        </div>
+        <div>
+          <p className="text-gray-600">Available Qty</p>
+          <p className="font-medium text-gray-900">{holding.availableQty}</p>
+        </div>
+        <div>
+          <p className="text-gray-600">DP Qty</p>
+          <p className="font-medium text-gray-900">{holding.dpQty}</p>
+        </div>
+        <div>
+          <p className="text-gray-600">T1 Qty</p>
+          <p className="font-medium text-gray-900">{holding.t1Qty}</p>
+        </div>
+      </div>
+      
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600">Total Value</span>
+          <span className="text-lg font-bold text-green-600">₹{totalValue.toFixed(2)}</span>
+        </div>
+        {holding.collateralQty > 0 && (
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-gray-600">Collateral Qty</span>
+            <span className="text-orange-600">{holding.collateralQty}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Quick Trade Actions */}
+      <div className="mt-4 pt-4 border-t border-gray-200 flex space-x-2">
+        <button
+          onClick={() => onBuyMore(holding)}
+          className="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors"
+        >
+          <PlusIcon className="w-4 h-4 mr-1" />
+          Buy More
+        </button>
+        <button
+          onClick={() => onSellExisting(holding)}
+          disabled={holding.availableQty === 0}
+          className="flex-1 flex items-center justify-center px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          <MinusIcon className="w-4 h-4 mr-1" />
+          Sell Qty
+        </button>
+      </div>
+    </div>
+  );
+};
   
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all duration-300 transform hover:-translate-y-1 animate-fade-in">
@@ -118,39 +187,23 @@ const HoldingsStats = ({ holdings }: { holdings: DhanHolding[] }) => {
   );
 };
 
+// Define sorting options
+type SortOption = 'name' | 'value' | 'quantity' | 'avgPrice';
+type SortDirection = 'asc' | 'desc';
+
 export default function Holdings() {
   const { data, isLoading, error, isError, refetch } = useHoldings();
   const { addToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'name' | 'value' | 'quantity'>('name');
-
-  // Quick Trade Modal State
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Sorting state
+  const [sortBy, setSortBy] = useState<SortOption>('name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  
+  // Quick trade modal state
+  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [selectedHolding, setSelectedHolding] = useState<DhanHolding | null>(null);
-  const [tradeType, setTradeType] = useState<TransactionType>('BUY');
-
-  // Modal handlers
-  const handleBuyMore = (holding: DhanHolding) => {
-    setSelectedHolding(holding);
-    setTradeType('BUY');
-    setIsModalOpen(true);
-  };
-
-  const handleSellExisting = (holding: DhanHolding) => {
-    setSelectedHolding(holding);
-    setTradeType('SELL');
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedHolding(null);
-  };
-
-  const handleOrderPlaced = () => {
-    // Refresh holdings data after order placement
-    refetch();
-  };
+  const [tradeType, setTradeType] = useState<'BUY' | 'SELL'>('BUY');
 
   const handleRefresh = async () => {
     try {
@@ -169,26 +222,85 @@ export default function Holdings() {
     }
   };
 
-  // Filter and sort holdings
-  const processedHoldings = (data || [])
-    .filter((holding: DhanHolding) =>
+  // Quick trade handlers
+  const handleBuyMore = (holding: DhanHolding) => {
+    setSelectedHolding(holding);
+    setTradeType('BUY');
+    setIsTradeModalOpen(true);
+  };
+
+  const handleSellExisting = (holding: DhanHolding) => {
+    setSelectedHolding(holding);
+    setTradeType('SELL');
+    setIsTradeModalOpen(true);
+  };
+
+  const handleTradeModalClose = () => {
+    setIsTradeModalOpen(false);
+    setSelectedHolding(null);
+  };
+
+  const handleOrderPlaced = () => {
+    // Refresh holdings data after order is placed
+    refetch();
+  };
+
+  // Sorting handlers
+  const handleSort = (option: SortOption) => {
+    if (sortBy === option) {
+      // Toggle direction if same option
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Set new sort option with ascending direction
+      setSortBy(option);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortHoldings = (holdings: DhanHolding[]): DhanHolding[] => {
+    return [...holdings].sort((a, b) => {
+      let aValue: string | number;
+      let bValue: string | number;
+
+      switch (sortBy) {
+        case 'name':
+          aValue = a.tradingSymbol.toLowerCase();
+          bValue = b.tradingSymbol.toLowerCase();
+          break;
+        case 'value':
+          aValue = a.totalQty * a.avgCostPrice;
+          bValue = b.totalQty * b.avgCostPrice;
+          break;
+        case 'quantity':
+          aValue = a.totalQty;
+          bValue = b.totalQty;
+          break;
+        case 'avgPrice':
+          aValue = a.avgCostPrice;
+          bValue = b.avgCostPrice;
+          break;
+        default:
+          aValue = a.tradingSymbol.toLowerCase();
+          bValue = b.tradingSymbol.toLowerCase();
+      }
+
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const comparison = aValue.localeCompare(bValue);
+        return sortDirection === 'asc' ? comparison : -comparison;
+      } else {
+        const comparison = (aValue as number) - (bValue as number);
+        return sortDirection === 'asc' ? comparison : -comparison;
+      }
+    });
+  };
+
+  // Filter and sort holdings based on search term and sorting options
+  const processedHoldings = sortHoldings(
+    (data || []).filter((holding: DhanHolding) =>
       holding.tradingSymbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
       holding.exchange.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    .sort((a: DhanHolding, b: DhanHolding) => {
-      switch (sortBy) {
-        case 'name':
-          return a.tradingSymbol.localeCompare(b.tradingSymbol);
-        case 'value':
-          const valueA = a.totalQty * a.avgCostPrice;
-          const valueB = b.totalQty * b.avgCostPrice;
-          return valueB - valueA; // Descending order
-        case 'quantity':
-          return b.totalQty - a.totalQty; // Descending order
-        default:
-          return 0;
-      }
-    });
+  );
 
   if (isLoading) {
     return (
@@ -281,52 +393,16 @@ export default function Holdings() {
         </div>
       </div>
 
-      <HoldingsStats holdings={processedHoldings} />
-
-      {/* Sort Controls */}
-      <div className="mb-4 flex items-center gap-2 text-sm">
-        <BarsArrowUpIcon className="h-4 w-4 text-gray-500" />
-        <span className="text-gray-600">Sort by:</span>
-        <button
-          onClick={() => setSortBy('name')}
-          className={`px-3 py-1 rounded-md transition-colors ${
-            sortBy === 'name' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          Name
-        </button>
-        <button
-          onClick={() => setSortBy('value')}
-          className={`px-3 py-1 rounded-md transition-colors ${
-            sortBy === 'value' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          Value
-        </button>
-        <button
-          onClick={() => setSortBy('quantity')}
-          className={`px-3 py-1 rounded-md transition-colors ${
-            sortBy === 'quantity' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          Quantity
-        </button>
-      </div>
+      <HoldingsStats holdings={filteredHoldings} />
 
       {searchTerm && (
         <div className="mb-4 text-sm text-gray-600">
-          Found {processedHoldings.length} holding(s) matching "{searchTerm}"
+          Found {filteredHoldings.length} holding(s) matching "{searchTerm}"
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {processedHoldings.map((holding: DhanHolding) => (
+        {filteredHoldings.map((holding: DhanHolding) => (
           <HoldingsCard 
             key={`${holding.securityId}-${holding.isin}`} 
             holding={holding}
@@ -336,7 +412,7 @@ export default function Holdings() {
         ))}
       </div>
 
-      {processedHoldings.length === 0 && searchTerm && (
+      {filteredHoldings.length === 0 && searchTerm && (
         <div className="text-center py-8">
           <MagnifyingGlassIcon className="w-12 h-12 mx-auto text-gray-300 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No holdings found</h3>
@@ -347,10 +423,10 @@ export default function Holdings() {
       )}
 
       {/* Quick Trade Modal */}
-      {selectedHolding && (
+      {isTradeModalOpen && selectedHolding && (
         <QuickTradeModal
-          isOpen={isModalOpen}
-          onCloseAction={handleCloseModal}
+          isOpen={isTradeModalOpen}
+          onCloseAction={handleTradeModalClose}
           holding={selectedHolding}
           defaultTransactionType={tradeType}
           onOrderPlacedAction={handleOrderPlaced}
