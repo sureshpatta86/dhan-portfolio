@@ -22,6 +22,8 @@ import { ForeverOrderDashboard } from '@/components/ForeverOrderDashboard';
 import { ForeverOrderBook } from '@/components/ForeverOrderBook';
 import { ForeverOrderForm } from '@/components/forms/ForeverOrderForm';
 import { ForeverOrderEditForm } from '@/components/forms/ForeverOrderEditForm';
+import OptionChainDashboard from '@/components/OptionChainDashboard';
+import MarketHolidayCalendar from '@/components/MarketHolidayCalendar';
 import type { DhanForeverOrder, DhanSuperOrder, DhanOrder } from '@/features/trading/types';
 
 const HomePage: React.FC = () => {
@@ -396,6 +398,14 @@ const HomePage: React.FC = () => {
                 );
             case '/funds':
                 return <Funds />;
+            case '/market/option-chain':
+                return <OptionChainDashboard />;
+            case '/market-holidays':
+                return (
+                    <div className="p-6">
+                        <MarketHolidayCalendar />
+                    </div>
+                );
             case '/reports/statements':
                 return <Statements />;
             case '/tools/traders-control':

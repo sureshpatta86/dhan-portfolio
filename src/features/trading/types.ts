@@ -417,3 +417,69 @@ export interface ForeverOrderBookResponse {
   data: DhanForeverOrder[];
   count: number;
 }
+
+// Option Chain Types
+export interface OptionGreeks {
+  delta: number;
+  theta: number;
+  gamma: number;
+  vega: number;
+}
+
+export interface OptionData {
+  greeks: OptionGreeks;
+  implied_volatility: number;
+  last_price: number;
+  oi: number;
+  previous_close_price: number;
+  previous_oi: number;
+  previous_volume: number;
+  top_ask_price: number;
+  top_ask_quantity: number;
+  top_bid_price: number;
+  top_bid_quantity: number;
+  volume: number;
+}
+
+export interface OptionStrike {
+  ce?: OptionData;
+  pe?: OptionData;
+}
+
+export interface OptionChainData {
+  last_price: number;
+  oc: Record<string, OptionStrike>;
+}
+
+export interface OptionChainResponse {
+  data: OptionChainData;
+  status: string;
+}
+
+export interface OptionChainRequest {
+  UnderlyingScrip: number;
+  UnderlyingSeg: string;
+  Expiry: string;
+}
+
+export interface ExpiryListRequest {
+  UnderlyingScrip: number;
+  UnderlyingSeg: string;
+}
+
+export interface ExpiryListResponse {
+  data: string[];
+  status: string;
+}
+
+// Common underlying instruments
+export const COMMON_UNDERLYINGS = {
+  NIFTY: { scrip: 13, segment: 'IDX_I', name: 'NIFTY' },
+  BANKNIFTY: { scrip: 25, segment: 'IDX_I', name: 'BANK NIFTY' },
+  FINNIFTY: { scrip: 27, segment: 'IDX_I', name: 'FIN NIFTY' },
+  MIDCPNIFTY: { scrip: 1992, segment: 'IDX_I', name: 'MIDCAP NIFTY' },
+  SENSEX: { scrip: 51, segment: 'IDX_I', name: 'SENSEX' },
+  BANKEX: { scrip: 690, segment: 'IDX_I', name: 'BANKEX' },
+} as const;
+
+export type UnderlyingKey = keyof typeof COMMON_UNDERLYINGS;
