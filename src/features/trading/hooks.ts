@@ -4,7 +4,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { TradingService } from './services';
-import type { PlaceOrderRequest, ModifyOrderRequest, PlaceSuperOrderRequest, ModifySuperOrderRequest } from './types';
+import type { PlaceOrderRequest, ModifyOrderRequest, PlaceSuperOrderRequest, ModifySuperOrderRequest, PlaceForeverOrderRequest, ModifyForeverOrderRequest } from './types';
 
 // Query keys for React Query
 export const tradingQueryKeys = {
@@ -21,6 +21,9 @@ export const tradingQueryKeys = {
   // Super Order query keys
   superOrders: () => [...tradingQueryKeys.all, 'super-orders'] as const,
   superOrderBook: () => [...tradingQueryKeys.superOrders(), 'book'] as const,
+  // Forever Order query keys
+  foreverOrders: () => [...tradingQueryKeys.all, 'forever-orders'] as const,
+  foreverOrderBook: () => [...tradingQueryKeys.foreverOrders(), 'book'] as const,
 };
 
 export function useFunds() {
@@ -233,6 +236,56 @@ export function useCancelSuperOrder() {
     onSuccess: () => {
       // Invalidate super order book
       queryClient.invalidateQueries({ queryKey: tradingQueryKeys.superOrderBook() });
+    },
+  });
+}
+
+// Forever Order Management Hooks
+
+export function useForeverOrderBook() {
+  console.log('useForeverOrderBook hook called');
+  
+  return useQuery({
+    queryKey: tradingQueryKeys.foreverOrderBook(),
+    queryFn: TradingService.getForeverOrderBook,
+    staleTime: 1000 * 30, // 30 seconds
+    refetchInterval: 1000 * 30, // Refresh every 30 seconds
+  });
+}
+
+export function usePlaceForeverOrder() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (orderData: PlaceForeverOrderRequest) => TradingService.placeForeverOrder(orderData),
+    onSuccess: () => {
+      // Invalidate forever order book and funds to refresh data
+      queryClient.invalidateQueries({ queryKey: tradingQueryKeys.foreverOrderBook() });
+      queryClient.invalidateQueries({ queryKey: tradingQueryKeys.funds() });
+    },
+  });
+}
+
+export function useModifyForeverOrder() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (modifyData: ModifyForeverOrderRequest) => TradingService.modifyForeverOrder(modifyData),
+    onSuccess: () => {
+      // Invalidate forever order book
+      queryClient.invalidateQueries({ queryKey: tradingQueryKeys.foreverOrderBook() });
+    },
+  });
+}
+
+export function useCancelForeverOrder() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (orderId: string) => TradingService.cancelForeverOrder(orderId),
+    onSuccess: () => {
+      // Invalidate forever order book
+      queryClient.invalidateQueries({ queryKey: tradingQueryKeys.foreverOrderBook() });
     },
   });
 }

@@ -320,3 +320,100 @@ export interface SuperOrderBookResponse {
   data: DhanSuperOrder[];
   count: number;
 }
+
+// Forever Order types
+export type ForeverOrderFlag = 'SINGLE' | 'OCO';
+export type ForeverOrderStatus = 'TRANSIT' | 'PENDING' | 'REJECTED' | 'CANCELLED' | 'TRADED' | 'EXPIRED' | 'CONFIRM';
+
+// Create Forever Order request
+export interface PlaceForeverOrderRequest {
+  dhanClientId: string;
+  correlationId?: string;
+  orderFlag: ForeverOrderFlag;
+  transactionType: TransactionType;
+  exchangeSegment: ExchangeSegment;
+  productType: ProductType;
+  orderType: OrderType;
+  validity: OrderValidity;
+  securityId: string;
+  quantity: number;
+  disclosedQuantity?: number;
+  price: number;
+  triggerPrice: number;
+  // OCO specific fields
+  price1?: number;
+  triggerPrice1?: number;
+  quantity1?: number;
+}
+
+// Modify Forever Order request
+export interface ModifyForeverOrderRequest {
+  dhanClientId: string;
+  orderId: string;
+  orderFlag: ForeverOrderFlag;
+  orderType: OrderType;
+  legName: LegName;
+  quantity: number;
+  price: number;
+  disclosedQuantity?: number;
+  triggerPrice: number;
+  validity: OrderValidity;
+}
+
+// Forever Order response
+export interface ForeverOrderResponse {
+  orderId: string;
+  orderStatus: ForeverOrderStatus;
+}
+
+// Detailed Forever Order information
+export interface DhanForeverOrder {
+  dhanClientId: string;
+  orderId: string;
+  orderStatus: ForeverOrderStatus;
+  transactionType: TransactionType;
+  exchangeSegment: ExchangeSegment;
+  productType: ProductType;
+  orderType: ForeverOrderFlag; // Note: API returns orderType as SINGLE/OCO for forever orders
+  tradingSymbol: string;
+  securityId: string;
+  quantity: number;
+  price: number;
+  triggerPrice: number;
+  legName: LegName;
+  createTime: string;
+  updateTime?: string;
+  exchangeTime?: string;
+  drvExpiryDate?: string;
+  drvOptionType?: OptionType;
+  drvStrikePrice: number;
+}
+
+// Forever Order API Response wrapper types
+export interface PlaceForeverOrderResponse {
+  success: boolean;
+  endpoint: string;
+  data: ForeverOrderResponse;
+  message: string;
+}
+
+export interface ModifyForeverOrderResponse {
+  success: boolean;
+  endpoint: string;
+  data: ForeverOrderResponse;
+  message: string;
+}
+
+export interface CancelForeverOrderResponse {
+  success: boolean;
+  endpoint: string;
+  data: ForeverOrderResponse;
+  message: string;
+}
+
+export interface ForeverOrderBookResponse {
+  success: boolean;
+  endpoint: string;
+  data: DhanForeverOrder[];
+  count: number;
+}
