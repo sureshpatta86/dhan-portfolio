@@ -5,10 +5,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ForeverOrderForm } from '@/components/forms/ForeverOrderForm';
-import { ForeverOrderEditForm } from '@/components/forms/ForeverOrderEditForm';
-import { ForeverOrderBook } from '@/components/ForeverOrderBook';
-import { ForeverOrderDashboard } from '@/components/ForeverOrderDashboard';
+import { ForeverOrderForm } from '@/components/features/orders/forms/ForeverOrderForm';
+import { ForeverOrderEditForm } from '@/components/features/orders/forms/ForeverOrderEditForm';
+import { ForeverOrderBook } from '@/components/features/orders/ForeverOrderBook';
+import { ForeverOrderDashboard } from '@/components/features/dashboard/ForeverOrderDashboard';
 import type { DhanForeverOrder } from '@/features/trading/types';
 
 const ForeverOrderPage: React.FC = () => {

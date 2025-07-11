@@ -7,7 +7,7 @@
 import React from 'react';
 import { ReactQueryProvider } from './react-query';
 import { ToastProvider } from '@/lib/components/ui/ToastProvider';
-import ChunkErrorBoundary from '@/components/common/ChunkErrorBoundary';
+import ChunkErrorBoundary from '@/components/ui/ChunkErrorBoundary';
 import { ChunkLoadErrorHandler } from '@/lib/hooks/useChunkLoadErrorHandler';
 import { ServiceWorkerRegistration } from '@/lib/hooks/useServiceWorker';
 

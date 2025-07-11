@@ -1,5 +1,6 @@
 /**
  * Test Dhan API connectivity and authentication
+ * Usage: node scripts/test/api/test-dhan-connectivity.js
  */
 
 const API_BASE = 'http://localhost:3000/api';

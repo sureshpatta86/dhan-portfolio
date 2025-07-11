@@ -5,10 +5,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { SuperOrderForm } from '@/components/forms/SuperOrderForm';
-import { ModifySuperOrderForm } from '@/components/forms/ModifySuperOrderForm';
-import { SuperOrderBook } from '@/components/SuperOrderBook';
-import { SuperOrderDashboard } from '@/components/SuperOrderDashboard';
+import { SuperOrderForm } from '@/components/features/orders/forms/SuperOrderForm';
+import { ModifySuperOrderForm } from '@/components/features/orders/forms/ModifySuperOrderForm';
+import { SuperOrderBook } from '@/components/features/orders/SuperOrderBook';
+import { SuperOrderDashboard } from '@/components/features/dashboard/SuperOrderDashboard';
 import type { DhanSuperOrder } from '@/features/trading/types';
 
 const SuperOrderPage: React.FC = () => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { ConvertPosition } from '@/components/ConvertPosition';
+import { ConvertPosition } from '@/components/features/holdings/ConvertPosition';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function ConvertPositionPage() {

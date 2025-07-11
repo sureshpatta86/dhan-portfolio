@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import MarketStatusIndicator from '@/components/MarketStatusIndicator';
+import MarketStatusIndicator from '@/components/features/market/MarketStatusIndicator';
 import { getMarketStatus } from '@/lib/utils/marketStatus';
 
 export default function MarketStatusTestPage() {

@@ -6,7 +6,7 @@ import type { DhanHolding } from '@/features/portfolio/types';
 import { LoadingSkeleton } from '@/lib/components/ui/LoadingStates';
 import { useToast } from '@/lib/components/ui/ToastProvider';
 import { MagnifyingGlassIcon, BarsArrowUpIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
-import { QuickTradeModal } from '@/components/common/QuickTradeModal';
+import { QuickTradeModal } from '@/components/ui/QuickTradeModal';
 import type { TransactionType } from '@/features/trading/types';
 
 const HoldingsCard = ({ 

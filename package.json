@@ -6,7 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "scripts": "node scripts/index.js",
+    "scripts:all": "node scripts/index.js all",
+    "test:api": "node scripts/test/api/test-api-client.js",
+    "test:orders": "node scripts/test/api/test-orders-api.js",
+    "test:connectivity": "node scripts/test/api/test-dhan-connectivity.js",
+    "test:ledger": "node scripts/test/api/test-ledger-api.js",
+    "test:super-orders": "node scripts/test/api/test-super-order-api.js",
+    "debug:config": "node scripts/debug/debug-config.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { usePositions } from '@/features/portfolio';
 import { LoadingSkeleton } from '@/lib/components/ui/LoadingStates';
 import { ConvertPositionModal } from './forms/ConvertPositionModal';
-import { PositionsList } from './common/PositionsList';
+import { PositionsList } from '../../ui/PositionsList';
 import type { DhanPosition } from '@/features/portfolio/types';
 
 export function ConvertPosition() {

@@ -25,7 +25,7 @@ import {
   getFormattedHolidayInfo,
   type MarketHoliday 
 } from '@/lib/utils/marketHolidays';
-import HolidaySources from '@/components/HolidaySources';
+import HolidaySources from '@/components/features/market/HolidaySources';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',

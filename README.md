@@ -12,6 +12,47 @@ A comprehensive Next.js application for portfolio analysis and trading operation
 - **Error Handling**: Comprehensive error boundaries and chunk loading error recovery
 - **Modern UI**: Beautiful and responsive design with Tailwind CSS
 
+## 📁 Project Structure
+
+```
+portfolio-analysis/
+├── src/                    # Source code
+│   ├── components/        # React components (feature-based organization)
+│   ├── app/              # Next.js app router pages
+│   ├── lib/              # Utilities and configurations
+│   └── features/         # Feature-specific logic
+├── scripts/              # Development and testing scripts
+│   ├── test/api/         # API testing scripts
+│   ├── debug/            # Debug utilities
+│   └── index.js          # Script manager
+├── docs/                 # Documentation
+└── public/              # Static assets
+```
+
+## 🧪 Testing & Development Scripts
+
+The project includes organized development and testing scripts:
+
+```bash
+# List available scripts
+npm run scripts
+
+# Test API connectivity
+npm run test:connectivity
+
+# Test specific APIs
+npm run test:orders
+npm run test:ledger
+
+# Debug configuration
+npm run debug:config
+
+# Run all tests
+npm run scripts:all
+```
+
+See `scripts/README.md` for detailed information about available scripts.
+
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js 15.3.4 with App Router
