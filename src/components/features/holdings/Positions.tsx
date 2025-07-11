@@ -5,11 +5,77 @@ import { usePositions } from '@/features/portfolio/hooks';
 import { DhanPosition } from '@/features/portfolio/types';
 import { LoadingSkeleton } from '@/lib/components/ui';
 import { useToast } from '@/lib/components/ui/ToastProvider';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { QuickTradeModal } from '@/components/ui/QuickTradeModal';
+import { MagnifyingGlassIcon, PlusIcon, MinusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { isActivePosition, calculatePositionMetrics, calculatePortfolioSummary } from '@/features/portfolio/utils';
+import type { TransactionType } from '@/features/trading/types';
 
-const PositionCard = ({ position }: { position: DhanPosition }) => {
+const PositionCard = ({ position, onTradeAction }: { 
+  position: DhanPosition; 
+  onTradeAction: (position: DhanPosition, action: 'BUY' | 'SELL' | 'RE_ENTER') => void;
+}) => {
   const { totalValue, profitPercentage, isProfit, isActive } = calculatePositionMetrics(position);
+  
+  // Smart button logic based on position type and status
+  const getTradeButtons = () => {
+    if (!isActive) {
+      // Closed positions - show re-enter button
+      return (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <button
+            onClick={() => onTradeAction(position, 'RE_ENTER')}
+            className="w-full flex items-center justify-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+          >
+            <ArrowPathIcon className="w-4 h-4 mr-1" />
+            Re-enter Position
+          </button>
+        </div>
+      );
+    }
+
+    // Active positions - show position management buttons
+    if (position.positionType === 'LONG') {
+      return (
+        <div className="mt-4 pt-4 border-t border-gray-200 flex space-x-2">
+          <button
+            onClick={() => onTradeAction(position, 'BUY')}
+            className="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors"
+          >
+            <PlusIcon className="w-4 h-4 mr-1" />
+            Add More
+          </button>
+          <button
+            onClick={() => onTradeAction(position, 'SELL')}
+            className="flex-1 flex items-center justify-center px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 transition-colors"
+          >
+            <MinusIcon className="w-4 h-4 mr-1" />
+            Square Off
+          </button>
+        </div>
+      );
+    } else if (position.positionType === 'SHORT') {
+      return (
+        <div className="mt-4 pt-4 border-t border-gray-200 flex space-x-2">
+          <button
+            onClick={() => onTradeAction(position, 'BUY')}
+            className="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors"
+          >
+            <PlusIcon className="w-4 h-4 mr-1" />
+            Buy to Cover
+          </button>
+          <button
+            onClick={() => onTradeAction(position, 'SELL')}
+            className="flex-1 flex items-center justify-center px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 transition-colors"
+          >
+            <MinusIcon className="w-4 h-4 mr-1" />
+            Sell More
+          </button>
+        </div>
+      );
+    }
+
+    return null;
+  };
   
   return (
     <div className={`bg-white rounded-lg shadow-md p-6 border-2 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 animate-fade-in ${
@@ -156,6 +222,9 @@ const PositionCard = ({ position }: { position: DhanPosition }) => {
           </div>
         </div>
       )}
+
+      {/* Quick Trade Actions */}
+      {getTradeButtons()}
     </div>
   );
 };
@@ -215,6 +284,57 @@ export default function Positions() {
   const { addToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [showActiveOnly, setShowActiveOnly] = useState(false);
+
+  // Quick Trade Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState<DhanPosition | null>(null);
+  const [tradeType, setTradeType] = useState<TransactionType>('BUY');
+
+  // Convert DhanPosition to DhanHolding format for the modal
+  const createMockHoldingFromPosition = (position: DhanPosition) => ({
+    exchange: position.exchangeSegment.includes('NSE') ? 'NSE' as const : 'BSE' as const,
+    tradingSymbol: position.tradingSymbol,
+    securityId: position.securityId,
+    isin: '', // Not available in position data
+    totalQty: Math.abs(position.netQty),
+    dpQty: 0,
+    t1Qty: 0,
+    mtf_t1_qty: 0,
+    mtf_qty: 0,
+    availableQty: Math.abs(position.netQty),
+    collateralQty: 0,
+    avgCostPrice: position.positionType === 'LONG' ? position.buyAvg : position.sellAvg,
+    lastTradedPrice: position.costPrice,
+  });
+
+  // Handle trade actions
+  const handleTradeAction = (position: DhanPosition, action: 'BUY' | 'SELL' | 'RE_ENTER') => {
+    setSelectedPosition(position);
+    
+    if (action === 'RE_ENTER') {
+      // For closed positions, default to BUY to re-enter
+      setTradeType('BUY');
+    } else {
+      setTradeType(action);
+    }
+    
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedPosition(null);
+  };
+
+  const handleOrderPlaced = () => {
+    // Refresh positions data after order is placed
+    refetch();
+    addToast({
+      type: 'success',
+      title: 'Order Placed',
+      message: 'Your order has been placed successfully.',
+    });
+  };
 
   // Filter positions based on search term and active filter
   const filteredPositions = positions
@@ -355,7 +475,11 @@ export default function Positions() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPositions.map((position: DhanPosition, index: number) => (
-          <PositionCard key={`${position.securityId}-${position.productType}-${index}`} position={position} />
+          <PositionCard 
+            key={`${position.securityId}-${position.productType}-${index}`} 
+            position={position} 
+            onTradeAction={handleTradeAction}
+          />
         ))}
       </div>
 
@@ -367,6 +491,17 @@ export default function Positions() {
             No positions match your search for "{searchTerm}". Try a different search term.
           </p>
         </div>
+      )}
+
+      {/* Quick Trade Modal */}
+      {selectedPosition && (
+        <QuickTradeModal
+          isOpen={isModalOpen}
+          onCloseAction={handleCloseModal}
+          holding={createMockHoldingFromPosition(selectedPosition)}
+          defaultTransactionType={tradeType}
+          onOrderPlacedAction={handleOrderPlaced}
+        />
       )}
     </div>
   );
