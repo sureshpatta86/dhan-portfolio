@@ -81,7 +81,7 @@ export class TradingService {
     
     console.log('Ledger response:', response.data);
     
-    return response.data?.data || [];
+    return (response as any).data || [];
   }
 
   // Order Management Services
@@ -104,10 +104,10 @@ export class TradingService {
       );
       console.log('TradingService.getOrderBook: Raw response:', response);
       console.log('TradingService.getOrderBook: Response data:', response.data);
-      console.log('TradingService.getOrderBook: Extracted data:', response.data?.data);
-      console.log('TradingService.getOrderBook: Data length:', response.data?.data?.length);
+      console.log('TradingService.getOrderBook: Extracted data:', (response as any).data);
+      console.log('TradingService.getOrderBook: Data length:', (response as any).data?.length);
       
-      const result = response.data?.data || [];
+      const result = (response as any).data || [];
       console.log('TradingService.getOrderBook: Returning:', result);
       return result;
     } catch (error) {
@@ -171,15 +171,15 @@ export class TradingService {
       API_ENDPOINTS.TRADING.TRADES_BOOK
     );
     // The API returns { success: true, data: [...trades...], count: number }
-    // So we need to extract the data property from the response data
-    return response.data?.data || [];
+    // So we need to extract the data property from the response
+    return (response as any).data || [];
   }
 
   static async getTradesByOrderId(orderId: string): Promise<DhanTrade[]> {
     const response = await internalApiClient.get<{ success: boolean; data: DhanTrade[]; count: number }>(
       `${API_ENDPOINTS.TRADING.TRADES}/${orderId}`
     );
-    return response.data?.data || [];
+    return (response as any).data || [];
   }
 
   // Super Order Management Services
@@ -219,7 +219,8 @@ export class TradingService {
     const response = await internalApiClient.get<{ success: boolean; data: DhanSuperOrder[]; count: number }>(
       API_ENDPOINTS.TRADING.SUPER_ORDERS
     );
-    return response.data?.data || [];
+    // The internal API client returns the full response object, so we access response.data
+    return (response as any).data || [];
   }
 
   // Forever Order Management Services
@@ -259,7 +260,8 @@ export class TradingService {
     const response = await internalApiClient.get<{ success: boolean; data: DhanForeverOrder[]; count: number }>(
       API_ENDPOINTS.TRADING.FOREVER_ORDERS
     );
-    return response.data?.data || [];
+    // The internal API client returns the full response object, so we access response.data
+    return (response as any).data || [];
   }
 
   /**
