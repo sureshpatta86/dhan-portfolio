@@ -1,5 +1,5 @@
 // Test script to verify API client functionality
-const { internalApiClient } = require('./src/lib/api/client.ts');
+const { internalApiClient } = require('../../../src/lib/api/client.ts');
 
 async function testApiClient() {
     try {

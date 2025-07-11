@@ -7,7 +7,7 @@ import {
   getFormattedHolidayInfo,
   getHolidayStatistics 
 } from '@/lib/utils/marketHolidays';
-import HolidaySources from '@/components/HolidaySources';
+import HolidaySources from '@/components/features/market/HolidaySources';
 import Link from 'next/link';
 
 interface HolidayWidgetProps {

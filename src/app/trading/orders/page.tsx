@@ -5,10 +5,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { OrdersDashboard } from '@/components/OrdersDashboard';
-import { OrderBook } from '@/components/OrderBook';
-import { OrderForm } from '@/components/forms/OrderForm';
-import { EditOrderForm } from '@/components/forms/EditOrderForm';
+import { OrdersDashboard } from '@/components/features/dashboard/OrdersDashboard';
+import { OrderBook } from '@/components/features/orders/OrderBook';
+import { OrderForm } from '@/components/features/orders/forms/OrderForm';
+import { EditOrderForm } from '@/components/features/orders/forms/EditOrderForm';
 import type { DhanOrder } from '@/features/trading/types';
 
 type TabType = 'dashboard' | 'book' | 'place' | 'modify';

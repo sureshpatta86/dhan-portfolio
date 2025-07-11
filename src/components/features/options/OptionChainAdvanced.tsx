@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useOptionChain, useExpiryList } from '@/features/trading/hooks';
 import { COMMON_UNDERLYINGS, UnderlyingKey, OptionStrike, OptionData } from '@/features/trading/types';
-import MarketStatusIndicator from '@/components/MarketStatusIndicator';
+import MarketStatusIndicator from '@/components/features/market/MarketStatusIndicator';
 
 export default function OptionChainAdvanced() {
   const [selectedUnderlying, setSelectedUnderlying] = useState<UnderlyingKey>('NIFTY');

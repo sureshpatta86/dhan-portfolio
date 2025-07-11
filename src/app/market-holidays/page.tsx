@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import MarketHolidayCalendar from '@/components/MarketHolidayCalendar';
+import MarketHolidayCalendar from '@/components/features/market/MarketHolidayCalendar';
 
 export default function HolidaysPage() {
   return (

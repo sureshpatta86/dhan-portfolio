@@ -17,8 +17,8 @@ import { useHoldings, usePositions } from '@/features/portfolio';
 import type { DhanHolding, DhanPosition } from '@/features/portfolio/types';
 import { LoadingSkeleton } from '@/lib/components/ui/LoadingStates';
 import { useTradersControlStore } from '@/lib/store/tradersControl';
-import MarketStatusIndicator from '@/components/MarketStatusIndicator';
-import HolidayWidget from '@/components/HolidayWidget';
+import MarketStatusIndicator from '@/components/features/market/MarketStatusIndicator';
+import HolidayWidget from '@/components/features/market/HolidayWidget';
 
 interface StatsCardProps {
   title: string;

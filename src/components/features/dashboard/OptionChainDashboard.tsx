@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import OptionChain from './OptionChain';
-import OptionChainAdvanced from './OptionChainAdvanced';
+import OptionChain from '../options/OptionChain';
+import OptionChainAdvanced from '../options/OptionChainAdvanced';
 
 export default function OptionChainDashboard() {
   const [activeTab, setActiveTab] = useState<'basic' | 'advanced' | 'analyzer'>('advanced');

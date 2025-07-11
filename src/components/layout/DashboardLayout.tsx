@@ -40,7 +40,7 @@ if (typeof window !== 'undefined') {
     }
   });
 }
-import KillSwitchIndicator from '@/components/KillSwitchIndicator';
+import KillSwitchIndicator from '@/components/features/trading/KillSwitchIndicator';
 
 interface NavigationItem {
   name: string;
