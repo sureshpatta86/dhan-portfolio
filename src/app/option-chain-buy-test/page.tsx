@@ -8,7 +8,7 @@ export default function OptionChainWithBuyButtonsTest() {
   const [activeTab, setActiveTab] = React.useState<'basic' | 'advanced'>('basic');
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto p-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -27,8 +27,8 @@ export default function OptionChainWithBuyButtonsTest() {
               onClick={() => setActiveTab('basic')}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'basic'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
               Basic Option Chain
@@ -37,8 +37,8 @@ export default function OptionChainWithBuyButtonsTest() {
               onClick={() => setActiveTab('advanced')}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'advanced'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
               Advanced Option Chain
@@ -68,10 +68,10 @@ export default function OptionChainWithBuyButtonsTest() {
 
         {/* Feature Description */}
         <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3">
+          <h3 className="text-lg font-semibold text-blue-900 mb-3">
             New Features Added:
           </h3>
-          <ul className="list-disc list-inside space-y-2 text-blue-800 dark:text-blue-200">
+          <ul className="list-disc list-inside space-y-2 text-blue-800">
             <li>Buy buttons added to each Call and Put option in the option chain</li>
             <li>Clicking a buy button opens a comprehensive order placement modal</li>
             <li>Order modal supports multiple order types: Market, Limit, Stop Loss, Stop Loss Market</li>

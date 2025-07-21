@@ -439,6 +439,7 @@ export interface OptionData {
   top_bid_price: number;
   top_bid_quantity: number;
   volume: number;
+  lot_size?: number;
 }
 
 export interface OptionStrike {
