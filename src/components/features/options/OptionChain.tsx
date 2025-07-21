@@ -27,7 +27,7 @@ export default function OptionChain() {
   const { 
     data: expiryData, 
     isLoading: expiryLoading, 
-    error: expiryError 
+    error: expiryError
   } = useExpiryList(underlying.scrip, underlying.segment);
 
   // Set default expiry to first available expiry
@@ -165,10 +165,10 @@ export default function OptionChain() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-bold text-gray-900">
             Option Chain
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-gray-500 mt-1">
             Auto-refresh: Every 60 seconds • Rate limited: 3 seconds between requests
             {!showAllStrikes && processedChain.length > 0 && (
               <span className="ml-2">• Showing 5 ATM strikes ({processedChain[0]?.strike}-{processedChain[processedChain.length-1]?.strike})</span>
@@ -178,7 +178,7 @@ export default function OptionChain() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowAllStrikes(!showAllStrikes)}
-            className="px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
+            className="px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200"
           >
             {showAllStrikes ? `Hide Extra (${processedChain.length - 5})` : `Show All`}
           </button>
@@ -188,7 +188,7 @@ export default function OptionChain() {
               refetchChain();
             }}
             disabled={chainLoading || (chainError?.message?.includes('429') || chainError?.message?.includes('rate limit'))}
-            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-300 rounded-lg hover:bg-blue-100 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-300 rounded-lg hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {chainLoading ? 'Refreshing...' : 
              (chainError?.message?.includes('429') || chainError?.message?.includes('rate limit')) ? 'Rate Limited' : 'Refresh'}
@@ -200,13 +200,14 @@ export default function OptionChain() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Underlying Selector */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="underlying-select">
             Underlying
           </label>
           <select
+            id="underlying-select"
             value={selectedUnderlying}
             onChange={(e) => handleUnderlyingChange(e.target.value as UnderlyingKey)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             {Object.entries(COMMON_UNDERLYINGS).map(([key, value]) => (
               <option key={key} value={key}>
@@ -218,14 +219,15 @@ export default function OptionChain() {
 
         {/* Expiry Selector */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="expiry-select">
             Expiry
           </label>
           <select
+            id="expiry-select"
             value={selectedExpiry}
             onChange={(e) => handleExpiryChange(e.target.value)}
             disabled={expiryLoading || !expiryData?.data}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:opacity-50"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
           >
             <option value="">
               {expiryLoading ? 'Loading...' : 'Select Expiry'}
@@ -320,7 +322,7 @@ export default function OptionChain() {
           ) : processedChain.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-900">
+                <thead className="bg-gray-50">
                   <tr>
                     {/* Call Option Headers */}
                     <th className="px-3 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">OI</th>
@@ -343,19 +345,19 @@ export default function OptionChain() {
                     <th className="px-3 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Volume</th>
                     <th className="px-3 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">OI</th>
                   </tr>
-                  <tr className="bg-gray-100 dark:bg-gray-800">
-                    <th colSpan={7} className="px-3 py-2 text-xs font-medium text-green-600 dark:text-green-400 text-center">CALL</th>
-                    <th className="px-3 py-2 text-xs font-medium text-gray-900 dark:text-white text-center"></th>
-                    <th colSpan={7} className="px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 text-center">PUT</th>
+                  <tr className="bg-gray-100">
+                    <th colSpan={7} className="px-3 py-2 text-xs font-medium text-green-600 text-center">CALL</th>
+                    <th className="px-3 py-2 text-xs font-medium text-gray-900 text-center"></th>
+                    <th colSpan={7} className="px-3 py-2 text-xs font-medium text-red-600 text-center">PUT</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="bg-white divide-y divide-gray-200">
                   {processedChain.map(({ strike, isATM, ce, pe }) => (
                     <tr 
                       key={strike} 
                       className={`${
-                        isATM ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''
-                      } hover:bg-gray-50 dark:hover:bg-gray-700`}
+                        isATM ? 'bg-yellow-50' : ''
+                      } hover:bg-gray-50`}
                     >
                       {/* Call Option Data */}
                       <OptionDataCell data={ce} field="oi" type="volume" />
@@ -382,8 +384,8 @@ export default function OptionChain() {
                       {/* Strike Price */}
                       <td className={`px-4 py-3 text-sm font-bold text-center ${
                         isATM 
-                          ? 'text-yellow-700 dark:text-yellow-300 bg-yellow-100 dark:bg-yellow-900/30' 
-                          : 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700'
+                          ? 'text-yellow-700 bg-yellow-100' 
+                          : 'text-gray-900 bg-gray-50'
                       }`}>
                         {formatNumber(strike)}
                       </td>
@@ -478,8 +480,8 @@ function OptionDataCell({ data, field, type, className = '' }: OptionDataCellPro
   return (
     <td className={`px-3 py-3 text-sm text-center ${
       hasData 
-        ? 'text-gray-900 dark:text-gray-100 font-medium' 
-        : 'text-gray-400 dark:text-gray-600'
+        ? 'text-gray-900 font-medium' 
+        : 'text-gray-400'
     } ${className}`}>
       {formattedValue}
     </td>
