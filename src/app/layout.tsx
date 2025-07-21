@@ -11,16 +11,33 @@ interface RootLayoutProps {
   children: React.ReactNode;
 }
 
-const RootLayout = ({ children }: RootLayoutProps) => {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body>
         <Providers>
           {children}
         </Providers>
+        
+        {/* Handle browser extension React errors */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('error', function(e) {
+                if (e.error && e.error.message && e.error.message.includes('Minified React error #299')) {
+                  console.warn('Browser extension React error caught and suppressed:', e.error.message);
+                  e.preventDefault();
+                  return false;
+                }
+              });
+            `,
+          }}
+        />
       </body>
     </html>
   );
-};
-
-export default RootLayout;
+}

@@ -1,9 +1,10 @@
 /**
- * Trading feature - API services
+ * Trading Services
  */
 
 import { internalApiClient } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/constants';
+import { withRateLimit } from '@/lib/utils/rateLimiter';
 import type { 
   DhanFunds, 
   DhanLedger,
@@ -269,8 +270,10 @@ export class TradingService {
    */
   static async getOptionChain(request: OptionChainRequest): Promise<OptionChainResponse> {
     try {
-      const response = await internalApiClient.post<OptionChainResponse>('/api/trading/option-chain', request);
-      return response.data!;
+      return await withRateLimit(async () => {
+        const response = await internalApiClient.post<any>('/api/trading/option-chain', request);
+        return response as OptionChainResponse;
+      });
     } catch (error) {
       console.error('Error fetching option chain:', error);
       throw error;
@@ -282,8 +285,10 @@ export class TradingService {
    */
   static async getExpiryList(request: ExpiryListRequest): Promise<ExpiryListResponse> {
     try {
-      const response = await internalApiClient.post<ExpiryListResponse>('/api/trading/option-chain/expiry-list', request);
-      return response.data!;
+      return await withRateLimit(async () => {
+        const response = await internalApiClient.post<any>('/api/trading/option-chain/expiry-list', request);
+        return response as ExpiryListResponse;
+      });
     } catch (error) {
       console.error('Error fetching expiry list:', error);
       throw error;

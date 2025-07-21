@@ -6,16 +6,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DHAN_CONFIG } from '@/lib/config/app';
 
 const DHAN_BASE_URL = DHAN_CONFIG.baseUrl;
-const DHAN_ACCESS_TOKEN = DHAN_CONFIG.accessToken;
+const DHAN_DATA_ACCESS_TOKEN = DHAN_CONFIG.dataAccessToken;
 const DHAN_CLIENT_ID = DHAN_CONFIG.clientId;
 
 export async function POST(request: NextRequest) {
   try {
-    if (!DHAN_ACCESS_TOKEN || !DHAN_CLIENT_ID) {
+    if (!DHAN_DATA_ACCESS_TOKEN || !DHAN_CLIENT_ID) {
       return NextResponse.json(
         { 
           error: 'Missing Dhan API credentials',
-          message: 'DHAN_ACCESS_TOKEN and DHAN_CLIENT_ID environment variables are required'
+          message: 'DHAN_DATA_ACCESS_TOKEN and DHAN_CLIENT_ID environment variables are required'
         },
         { status: 500 }
       );
@@ -23,12 +23,38 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     
-    // Validate required fields
-    if (!body.UnderlyingScrip || !body.UnderlyingSeg) {
+    // Validate required fields with detailed error messages
+    const missingFields = [];
+    if (!body.UnderlyingScrip) missingFields.push('UnderlyingScrip');
+    if (!body.UnderlyingSeg) missingFields.push('UnderlyingSeg');
+    
+    if (missingFields.length > 0) {
       return NextResponse.json(
         { 
           error: 'Missing required parameters',
-          message: 'UnderlyingScrip and UnderlyingSeg are required'
+          message: `The following fields are required: ${missingFields.join(', ')}`,
+          missingFields
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate field types and values
+    if (typeof body.UnderlyingScrip !== 'number' || body.UnderlyingScrip <= 0) {
+      return NextResponse.json(
+        { 
+          error: 'Invalid parameter',
+          message: 'UnderlyingScrip must be a positive number'
+        },
+        { status: 400 }
+      );
+    }
+
+    if (typeof body.UnderlyingSeg !== 'string' || body.UnderlyingSeg.trim() === '') {
+      return NextResponse.json(
+        { 
+          error: 'Invalid parameter',
+          message: 'UnderlyingSeg must be a non-empty string'
         },
         { status: 400 }
       );
@@ -37,7 +63,7 @@ export async function POST(request: NextRequest) {
     console.log('Expiry List API Request:', {
       url: `${DHAN_BASE_URL}/optionchain/expirylist`,
       headers: {
-        'access-token': DHAN_ACCESS_TOKEN ? `${DHAN_ACCESS_TOKEN.substring(0, 20)}...` : 'missing',
+        'access-token': DHAN_DATA_ACCESS_TOKEN ? `${DHAN_DATA_ACCESS_TOKEN.substring(0, 20)}...` : 'missing',
         'client-id': DHAN_CLIENT_ID || 'missing'
       },
       body
@@ -46,7 +72,7 @@ export async function POST(request: NextRequest) {
     const response = await fetch(`${DHAN_BASE_URL}/optionchain/expirylist`, {
       method: 'POST',
       headers: {
-        'access-token': DHAN_ACCESS_TOKEN,
+        'access-token': DHAN_DATA_ACCESS_TOKEN,
         'client-id': DHAN_CLIENT_ID,
         'Content-Type': 'application/json',
       },
