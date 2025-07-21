@@ -311,14 +311,30 @@ export const useOptionChain = (
 ) => {
   return useQuery({
     queryKey: ['optionChain', underlyingScrip, underlyingSeg, expiry],
-    queryFn: () => getOptionChain({
-      UnderlyingScrip: underlyingScrip,
-      UnderlyingSeg: underlyingSeg,
-      Expiry: expiry
-    }),
-    enabled: enabled && !!underlyingScrip && !!underlyingSeg && !!expiry,
-    staleTime: 3000, // 3 seconds as per API rate limit
-    refetchInterval: 5000, // Auto-refresh every 5 seconds
+    queryFn: () => {
+      // Additional validation before making the API call
+      if (!underlyingScrip || !underlyingSeg || !expiry) {
+        throw new Error('UnderlyingScrip, UnderlyingSeg, and Expiry are required');
+      }
+      console.log('Calling getOptionChain with:', { underlyingScrip, underlyingSeg, expiry });
+      return getOptionChain({
+        UnderlyingScrip: underlyingScrip,
+        UnderlyingSeg: underlyingSeg,
+        Expiry: expiry
+      });
+    },
+    enabled: enabled && !!underlyingScrip && !!underlyingSeg && !!expiry && expiry.trim() !== '',
+    staleTime: 1000 * 30, // 30 seconds - much more conservative for rate limit
+    gcTime: 1000 * 60 * 10, // 10 minutes cache
+    refetchInterval: 1000 * 60, // Auto-refresh every 60 seconds (much slower)
+    retry: (failureCount, error: any) => {
+      // Don't retry on rate limit errors
+      if (error?.message?.includes('429') || error?.status === 429) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 };
 
@@ -332,11 +348,27 @@ export const useExpiryList = (
 ) => {
   return useQuery({
     queryKey: ['expiryList', underlyingScrip, underlyingSeg],
-    queryFn: () => getExpiryList({
-      UnderlyingScrip: underlyingScrip,
-      UnderlyingSeg: underlyingSeg
-    }),
+    queryFn: () => {
+      // Additional validation before making the API call
+      if (!underlyingScrip || !underlyingSeg) {
+        throw new Error('UnderlyingScrip and UnderlyingSeg are required');
+      }
+      console.log('Calling getExpiryList with:', { underlyingScrip, underlyingSeg });
+      return getExpiryList({
+        UnderlyingScrip: underlyingScrip,
+        UnderlyingSeg: underlyingSeg
+      });
+    },
     enabled: enabled && !!underlyingScrip && !!underlyingSeg,
-    staleTime: 1000 * 60 * 5, // 5 minutes (expiry dates don't change frequently)
+    staleTime: 1000 * 60 * 10, // 10 minutes (expiry dates don't change frequently)
+    gcTime: 1000 * 60 * 30, // 30 minutes cache
+    retry: (failureCount, error: any) => {
+      // Don't retry on rate limit errors
+      if (error?.message?.includes('429') || error?.status === 429) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 };

@@ -7,6 +7,7 @@ import { COMMON_UNDERLYINGS, UnderlyingKey, OptionStrike, OptionData } from '@/f
 export default function OptionChain() {
   const [selectedUnderlying, setSelectedUnderlying] = useState<UnderlyingKey>('NIFTY');
   const [selectedExpiry, setSelectedExpiry] = useState<string>('');
+  const [showAllStrikes, setShowAllStrikes] = useState<boolean>(false);
 
   const underlying = COMMON_UNDERLYINGS[selectedUnderlying];
 
@@ -34,29 +35,75 @@ export default function OptionChain() {
     underlying.scrip, 
     underlying.segment, 
     selectedExpiry,
-    !!selectedExpiry
+    !!selectedExpiry && selectedExpiry.trim() !== ''
   );
+
+  // Calculate totals for call and put OI
+  const optionSummary = useMemo(() => {
+    if (!optionChainData?.data?.oc) return { totalCallOI: 0, totalPutOI: 0 };
+
+    let totalCallOI = 0;
+    let totalPutOI = 0;
+
+    Object.values(optionChainData.data.oc).forEach(strike => {
+      if (strike.ce?.oi) totalCallOI += strike.ce.oi;
+      if (strike.pe?.oi) totalPutOI += strike.pe.oi;
+    });
+
+    return { totalCallOI, totalPutOI };
+  }, [optionChainData]);
 
   // Process option chain data for table display
   const processedChain = useMemo(() => {
     if (!optionChainData?.data?.oc) return [];
 
-    const strikes = Object.keys(optionChainData.data.oc)
-      .map(strike => parseFloat(strike))
-      .sort((a, b) => a - b);
+    // Keep both the original string keys and parsed numeric values
+    const strikeEntries = Object.keys(optionChainData.data.oc).map(key => ({
+      originalKey: key,
+      numericValue: parseFloat(key)
+    })).sort((a, b) => a.numericValue - b.numericValue);
 
     const currentPrice = optionChainData.data.last_price;
-    const atTheMoneyStrike = strikes.reduce((prev, curr) => 
-      Math.abs(curr - currentPrice) < Math.abs(prev - currentPrice) ? curr : prev
+    
+    // Find the ATM strike
+    const atTheMoneyEntry = strikeEntries.reduce((prev, curr) => 
+      Math.abs(curr.numericValue - currentPrice) < Math.abs(prev.numericValue - currentPrice) ? curr : prev
     );
 
-    return strikes.map(strike => ({
-      strike: strike,
-      isATM: strike === atTheMoneyStrike,
-      ce: optionChainData.data.oc[strike.toString()]?.ce,
-      pe: optionChainData.data.oc[strike.toString()]?.pe,
+    let strikesToShow: typeof strikeEntries;
+
+    if (showAllStrikes) {
+      // Show all strikes within +/- 15% of current price for expanded view
+      const priceRange = currentPrice * 0.15;
+      strikesToShow = strikeEntries.filter(entry => 
+        Math.abs(entry.numericValue - currentPrice) <= priceRange
+      );
+      
+      // If no relevant strikes found, show a broader range
+      if (strikesToShow.length === 0) {
+        const centerIndex = strikeEntries.indexOf(atTheMoneyEntry);
+        const startIndex = Math.max(0, centerIndex - 15);
+        const endIndex = Math.min(strikeEntries.length, centerIndex + 16);
+        strikesToShow = strikeEntries.slice(startIndex, endIndex);
+      }
+    } else {
+      // Show only 5 strikes centered around ATM (2 above, ATM, 2 below)
+      const atmIndex = strikeEntries.indexOf(atTheMoneyEntry);
+      const startIndex = Math.max(0, atmIndex - 2);
+      const endIndex = Math.min(strikeEntries.length, startIndex + 5);
+      
+      // Adjust startIndex if we hit the end of the array
+      const adjustedStartIndex = Math.max(0, endIndex - 5);
+      strikesToShow = strikeEntries.slice(adjustedStartIndex, endIndex);
+    }
+
+    return strikesToShow.map(entry => ({
+      strike: entry.numericValue,
+      isATM: entry.numericValue === atTheMoneyEntry.numericValue,
+      ce: optionChainData.data.oc[entry.originalKey]?.ce,
+      pe: optionChainData.data.oc[entry.originalKey]?.pe,
     }));
-  }, [optionChainData]);
+  }, [optionChainData, showAllStrikes]);
 
   const handleUnderlyingChange = useCallback((key: UnderlyingKey) => {
     setSelectedUnderlying(key);
@@ -87,16 +134,36 @@ export default function OptionChain() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Option Chain
-        </h2>
-        <button
-          onClick={() => refetchChain()}
-          disabled={chainLoading}
-          className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-300 rounded-lg hover:bg-blue-100 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/30 disabled:opacity-50"
-        >
-          {chainLoading ? 'Refreshing...' : 'Refresh'}
-        </button>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Option Chain
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Auto-refresh: Every 60 seconds • Rate limited: 3 seconds between requests
+            {!showAllStrikes && processedChain.length > 0 && (
+              <span className="ml-2">• Showing 5 ATM strikes ({processedChain[0]?.strike}-{processedChain[processedChain.length-1]?.strike})</span>
+            )}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowAllStrikes(!showAllStrikes)}
+            className="px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
+          >
+            {showAllStrikes ? `Hide Extra (${processedChain.length - 5})` : `Show All`}
+          </button>
+          <button
+            onClick={() => {
+              // Clear any rate limit errors and manually refetch
+              refetchChain();
+            }}
+            disabled={chainLoading || (chainError?.message?.includes('429') || chainError?.message?.includes('rate limit'))}
+            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-300 rounded-lg hover:bg-blue-100 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {chainLoading ? 'Refreshing...' : 
+             (chainError?.message?.includes('429') || chainError?.message?.includes('rate limit')) ? 'Rate Limited' : 'Refresh'}
+          </button>
+        </div>
       </div>
 
       {/* Controls */}
@@ -148,14 +215,41 @@ export default function OptionChain() {
 
       {/* Current Price Display */}
       {optionChainData?.data?.last_price && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {underlying.name} Current Price
-            </p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              ₹{formatNumber(optionChainData.data.last_price)}
-            </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Current Price */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {underlying.name} Spot Price
+              </p>
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                ₹{formatNumber(optionChainData.data.last_price)}
+              </p>
+            </div>
+          </div>
+
+          {/* Total Call OI */}
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Total Call OI
+              </p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {formatVolume(optionSummary.totalCallOI)}
+              </p>
+            </div>
+          </div>
+
+          {/* Total Put OI */}
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Total Put OI
+              </p>
+              <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                {formatVolume(optionSummary.totalPutOI)}
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -163,14 +257,30 @@ export default function OptionChain() {
       {/* Error Display */}
       {(expiryError || chainError) && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4">
-          <p className="text-red-600 dark:text-red-400">
-            {expiryError?.message || chainError?.message || 'An error occurred'}
-          </p>
+          <div className="flex items-start space-x-2">
+            <div className="flex-shrink-0">
+              <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+                {chainError?.message?.includes('429') || chainError?.message?.includes('rate limit') 
+                  ? 'Rate Limit Reached' 
+                  : 'Error Loading Data'}
+              </h3>
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                {chainError?.message?.includes('429') || chainError?.message?.includes('rate limit')
+                  ? 'API rate limit exceeded. Data will refresh automatically in 1 minute. Manual refresh is disabled to prevent further rate limit errors.'
+                  : (expiryError?.message || chainError?.message || 'An error occurred')}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Option Chain Table */}
-      {selectedExpiry && (
+      {selectedExpiry ? (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           {chainLoading ? (
             <div className="p-8 text-center">
@@ -213,7 +323,7 @@ export default function OptionChain() {
                       key={strike} 
                       className={`${
                         isATM ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''
-                      } hover:bg-gray-50 dark:hover:bg-gray-750`}
+                      } hover:bg-gray-50 dark:hover:bg-gray-700`}
                     >
                       {/* Call Option Data */}
                       <OptionDataCell data={ce} field="oi" type="volume" />
@@ -250,6 +360,12 @@ export default function OptionChain() {
             </div>
           )}
         </div>
+      ) : (
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
+          <p className="text-gray-600 dark:text-gray-400">
+            {expiryLoading ? 'Loading expiry dates...' : 'Please select an expiry date to view option chain'}
+          </p>
+        </div>
       )}
     </div>
   );
@@ -267,7 +383,10 @@ function OptionDataCell({ data, field, type, className = '' }: OptionDataCellPro
   const value = data?.[field];
   
   let formattedValue = '-';
-  if (value !== undefined && value !== null) {
+  let hasData = false;
+  
+  if (value !== undefined && value !== null && value !== 0) {
+    hasData = true;
     switch (type) {
       case 'price':
         formattedValue = formatNumber(value as number);
@@ -282,7 +401,11 @@ function OptionDataCell({ data, field, type, className = '' }: OptionDataCellPro
   }
 
   return (
-    <td className={`px-3 py-3 text-sm text-center text-gray-900 dark:text-gray-100 ${className}`}>
+    <td className={`px-3 py-3 text-sm text-center ${
+      hasData 
+        ? 'text-gray-900 dark:text-gray-100 font-medium' 
+        : 'text-gray-400 dark:text-gray-600'
+    } ${className}`}>
       {formattedValue}
     </td>
   );

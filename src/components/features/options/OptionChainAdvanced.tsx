@@ -315,7 +315,7 @@ export default function OptionChainAdvanced() {
                       key={strike} 
                       className={`${
                         isATM ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''
-                      } hover:bg-gray-50 dark:hover:bg-gray-750`}
+                      } hover:bg-gray-50 dark:hover:bg-gray-700`}
                     >
                       {/* Call Option Data */}
                       <OptionDataCell data={ce} field="oi" type="volume" className={isITM.call ? 'bg-green-50 dark:bg-green-900/10' : ''} />
