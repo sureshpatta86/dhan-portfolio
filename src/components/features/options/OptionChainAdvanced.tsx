@@ -3,6 +3,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useOptionChain, useExpiryList } from '@/features/trading/hooks';
 import { COMMON_UNDERLYINGS, UnderlyingKey, OptionStrike, OptionData } from '@/features/trading/types';
+import OptionOrderModal from '@/components/ui/OptionOrderModal';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import MarketStatusIndicator from '@/components/features/market/MarketStatusIndicator';
 
 export default function OptionChainAdvanced() {
@@ -10,6 +12,17 @@ export default function OptionChainAdvanced() {
   const [selectedExpiry, setSelectedExpiry] = useState<string>('');
   const [filterATM, setFilterATM] = useState(false);
   const [atmRange, setAtmRange] = useState(10); // Number of strikes to show around ATM
+  const [orderModal, setOrderModal] = useState<{
+    isOpen: boolean;
+    optionData: OptionData | null;
+    optionType: 'CE' | 'PE';
+    strike: number;
+  }>({
+    isOpen: false,
+    optionData: null,
+    optionType: 'CE',
+    strike: 0
+  });
 
   const underlying = COMMON_UNDERLYINGS[selectedUnderlying];
 
@@ -94,6 +107,24 @@ export default function OptionChainAdvanced() {
 
   const handleExpiryChange = useCallback((expiry: string) => {
     setSelectedExpiry(expiry);
+  }, []);
+
+  const handleBuyOption = useCallback((optionData: OptionData, optionType: 'CE' | 'PE', strike: number) => {
+    setOrderModal({
+      isOpen: true,
+      optionData,
+      optionType,
+      strike
+    });
+  }, []);
+
+  const handleCloseOrderModal = useCallback(() => {
+    setOrderModal({
+      isOpen: false,
+      optionData: null,
+      optionType: 'CE',
+      strike: 0
+    });
   }, []);
 
   const formatNumber = (num: number | undefined): string => {
@@ -290,11 +321,13 @@ export default function OptionChainAdvanced() {
                     <th className="px-2 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Bid</th>
                     <th className="px-2 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Ask</th>
                     <th className="px-2 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Delta</th>
+                    <th className="px-2 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Buy</th>
                     
                     {/* Strike Price */}
                     <th className="px-4 py-3 text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider text-center bg-yellow-50 dark:bg-yellow-900/20">Strike</th>
                     
                     {/* Put Option Headers */}
+                    <th className="px-2 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Buy</th>
                     <th className="px-2 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Delta</th>
                     <th className="px-2 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Bid</th>
                     <th className="px-2 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Ask</th>
@@ -304,9 +337,9 @@ export default function OptionChainAdvanced() {
                     <th className="px-2 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">OI</th>
                   </tr>
                   <tr className="bg-gray-100 dark:bg-gray-800">
-                    <th colSpan={7} className="px-3 py-2 text-xs font-medium text-green-600 dark:text-green-400 text-center">CALL</th>
+                    <th colSpan={8} className="px-3 py-2 text-xs font-medium text-green-600 dark:text-green-400 text-center">CALL</th>
                     <th className="px-3 py-2 text-xs font-medium text-gray-900 dark:text-white text-center"></th>
-                    <th colSpan={7} className="px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 text-center">PUT</th>
+                    <th colSpan={8} className="px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 text-center">PUT</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -326,6 +359,20 @@ export default function OptionChainAdvanced() {
                       <OptionDataCell data={ce} field="top_ask_price" type="price" className={isITM.call ? 'bg-green-50 dark:bg-green-900/10' : ''} />
                       <OptionDataCell data={ce} field="greeks" type="greek" subField="delta" className={isITM.call ? 'bg-green-50 dark:bg-green-900/10' : ''} />
                       
+                      {/* Call Buy Button */}
+                      <td className={`px-2 py-3 text-center ${isITM.call ? 'bg-green-50 dark:bg-green-900/10' : ''}`}>
+                        {ce ? (
+                          <button
+                            onClick={() => handleBuyOption(ce, 'CE', strike)}
+                            className="px-2 py-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+                          >
+                            Buy
+                          </button>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      
                       {/* Strike Price */}
                       <td className={`px-4 py-3 text-sm font-bold text-center ${
                         isATM 
@@ -333,6 +380,20 @@ export default function OptionChainAdvanced() {
                           : 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700'
                       }`}>
                         {formatNumber(strike)}
+                      </td>
+                      
+                      {/* Put Buy Button */}
+                      <td className={`px-2 py-3 text-center ${isITM.put ? 'bg-red-50 dark:bg-red-900/10' : ''}`}>
+                        {pe ? (
+                          <button
+                            onClick={() => handleBuyOption(pe, 'PE', strike)}
+                            className="px-2 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                          >
+                            Buy
+                          </button>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
                       </td>
                       
                       {/* Put Option Data */}
@@ -355,6 +416,21 @@ export default function OptionChainAdvanced() {
           )}
         </div>
       )}
+      
+      {/* Option Order Modal */}
+      <OptionOrderModal
+        isOpen={orderModal.isOpen}
+        onCloseAction={handleCloseOrderModal}
+        optionData={orderModal.optionData}
+        optionType={orderModal.optionType}
+        strike={orderModal.strike}
+        expiry={selectedExpiry}
+        underlying={underlying.name}
+        onOrderPlacedAction={() => {
+          // Optionally refetch option chain data after order placement
+          refetchChain();
+        }}
+      />
     </div>
   );
 }
