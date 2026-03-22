@@ -85,17 +85,17 @@ This ensures compliance with Dhan's rate limiting requirements.
 # Trading operations
 DHAN_ACCESS_TOKEN=your_trading_token_here
 DHAN_CLIENT_ID=your_client_id_here
+```env
+# Trading operations
+DHAN_ACCESS_TOKEN=${DHAN_ACCESS_TOKEN}
+DHAN_CLIENT_ID=${DHAN_CLIENT_ID}
 DHAN_BASE_URL=https://api.dhan.co/v2
 
 # Market data operations  
-DHAN_DATA_ACCESS_TOKEN=your_data_token_here
+DHAN_DATA_ACCESS_TOKEN=${DHAN_DATA_ACCESS_TOKEN}
 ```
 
 ### Trading vs Data API Separation
-
-**Trading APIs** (use `DHAN_ACCESS_TOKEN`):
-- Orders (`/orders`)
-- Super Orders (`/super-orders`) 
 - Forever Orders (`/forever-orders`)
 - Funds (`/funds`)
 - Ledger (`/ledger`)

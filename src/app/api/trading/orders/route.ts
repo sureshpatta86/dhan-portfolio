@@ -7,8 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validatePlaceOrderRequest, OrderValidationError } from '@/features/trading/validation';
 
 function GET_DHAN_API_CONFIG() {
-  const accessToken = process.env.DHAN_ACCESS_TOKEN || "";
-  const baseUrl = process.env.DHAN_BASE_URL || "";
+  const accessToken = process.env.DHAN_ACCESS_TOKEN;
+  const baseUrl = process.env.DHAN_BASE_URL;
   
   if (!accessToken) {
     throw new Error("Access token is required");

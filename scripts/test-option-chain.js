@@ -9,13 +9,13 @@ require('dotenv').config({ path: '.env.local' });
 
 const DHAN_BASE_URL = process.env.DHAN_BASE_URL || 'https://api.dhan.co/v2';
 const DHAN_DATA_ACCESS_TOKEN = process.env.DHAN_DATA_ACCESS_TOKEN;
-const DHAN_CLIENT_ID = process.env.DHAN_CLIENT_ID;
-
 console.log('🔍 Testing Option Chain APIs');
 console.log('Base URL:', DHAN_BASE_URL);
 console.log('Client ID:', DHAN_CLIENT_ID ? `${DHAN_CLIENT_ID.substring(0, 10)}...` : 'Missing');
-console.log('Data Access Token:', DHAN_DATA_ACCESS_TOKEN ? `${DHAN_DATA_ACCESS_TOKEN.substring(0, 20)}...` : 'Missing');
+console.log('Data Access Token:', DHAN_DATA_ACCESS_TOKEN ? 'Present' : 'Missing');
 
+if (!DHAN_DATA_ACCESS_TOKEN || !DHAN_CLIENT_ID) {
+  console.error('❌ Missing required environment variables');
 if (!DHAN_DATA_ACCESS_TOKEN || !DHAN_CLIENT_ID) {
   console.error('❌ Missing required environment variables');
   process.exit(1);

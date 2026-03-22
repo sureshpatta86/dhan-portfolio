@@ -246,7 +246,7 @@ useEffect(() => {
 
 ### Environment Variables
 ```env
-DHAN_ACCESS_TOKEN=your_access_token
+DHAN_ACCESS_TOKEN=${DHAN_ACCESS_TOKEN}
 DHAN_BASE_URL=https://api.dhan.co/v2
 ```
 

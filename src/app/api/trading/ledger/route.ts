@@ -1,5 +1,5 @@
 function GET_DHAN_API_CONFIG() {
-  const accessToken = process.env.DHAN_ACCESS_TOKEN || "";
+  const accessToken = process.env.DHAN_ACCESS_TOKEN;
   const clientId = process.env.DHAN_CLIENT_ID || "";
   const baseUrl = process.env.DHAN_BASE_URL || "";
 
@@ -21,43 +21,25 @@ function GET_DHAN_API_CONFIG() {
     baseUrl,
   };
 }
-
-export async function GET(request: Request) {
   try {
     // Get Dhan API configuration
     console.log("Fetching ledger from Dhan API");
-    const { accessToken, clientId, baseUrl } = GET_DHAN_API_CONFIG();
-    
-    if (!accessToken) {
+    let accessToken: string;
+    let clientId: string;
+    let baseUrl: string;
+    try {
+      ({ accessToken, clientId, baseUrl } = GET_DHAN_API_CONFIG());
+    } catch (error) {
       return new Response(
-        JSON.stringify({ error: "Access token is required" }),
-        {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    if (!clientId) {
-      return new Response(
-        JSON.stringify({ error: "Client ID is required" }),
-        {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    if (!baseUrl) {
-      return new Response(
-        JSON.stringify({ error: "Dhan base URL is not configured" }),
+        JSON.stringify({ error: error instanceof Error ? error.message : "Dhan API is not configured" }),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" },
-        }
       );
     }
 
+    const url = new URL(request.url);
+    const fromDate = url.searchParams.get('from-date');
+    const toDate = url.searchParams.get('to-date');
     // Parse query parameters for date range
     const url = new URL(request.url);
     const fromDate = url.searchParams.get('from-date');

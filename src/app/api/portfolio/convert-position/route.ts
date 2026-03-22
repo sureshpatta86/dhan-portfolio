@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const ACCESS_TOKEN = process.env.DHAN_ACCESS_TOKEN;
+    const ACCESS_TOKEN = process.env.ACCESS_TOKEN || process.env.DHAN_ACCESS_TOKEN;
     
     if (!ACCESS_TOKEN) {
       return NextResponse.json(
