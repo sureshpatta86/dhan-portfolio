@@ -57,7 +57,7 @@ export const SuperOrderForm: React.FC<SuperOrderFormProps> = ({ onSuccess, onCan
           <div className="bg-gray-50 rounded-lg p-4 text-left max-w-md mx-auto">
             <h4 className="font-medium text-gray-900 mb-2">Required Environment Variables:</h4>
             <code className="text-sm text-gray-700 block space-y-1">
-              <div>DHAN_ACCESS_TOKEN=your_token</div>
+              <div>DHAN_ACCESS_TOKEN=&lt;set-in-environment&gt;</div>
               <div>DHAN_CLIENT_ID=your_client_id</div>
             </code>
           </div>
