@@ -2,14 +2,14 @@
  * Trade Book API Route
  * GET /api/trading/trades - Get all trades
  * GET /api/trading/trades/[orderId] - Get trades for specific order
- */
 
 import { NextRequest, NextResponse } from 'next/server';
 
 function GET_DHAN_API_CONFIG() {
-  const accessToken = process.env.DHAN_ACCESS_TOKEN || "";
+  const accessToken = process.env.DHAN_ACCESS_TOKEN;
   const baseUrl = process.env.DHAN_BASE_URL || "";
   
+  if (!accessToken) {
   if (!accessToken) {
     throw new Error("Access token is required");
   }
