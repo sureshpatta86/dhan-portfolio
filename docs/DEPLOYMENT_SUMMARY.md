@@ -72,14 +72,14 @@ All security vulnerabilities have been identified and resolved:
 ---
 
 ## 🛡️ **Security Configuration**
+
+### **Environment Variables**
 ```env
 DHAN_ACCESS_TOKEN=your_dhan_access_token_here
 DHAN_BASE_URL=https://api.dhan.co/v2
 DATABASE_URL=your_database_url_here
-NEXTAUTH_SECRET=${SECURELY_MANAGED_NEXTAUTH_SECRET}
+NEXTAUTH_SECRET=generate_a_secure_random_secret_and_store_via_env
 ```
-
-### **Protected Files**
 
 ### **Protected Files**
 - `.env.local` - Local environment variables
