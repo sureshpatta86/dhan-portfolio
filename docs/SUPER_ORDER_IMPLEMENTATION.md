@@ -179,7 +179,7 @@ await cancelSuperOrder({
 ```bash
 # Required for Dhan API integration
 DHAN_BASE_URL=https://api.dhan.co/v2
-DHAN_ACCESS_TOKEN=your_access_token_here
+DHAN_ACCESS_TOKEN=\${DHAN_ACCESS_TOKEN}
 DHAN_CLIENT_ID=your_client_id_here
 ```
 
