@@ -6,18 +6,18 @@ export const APP_CONFIG = {
   name: 'Portfolio Analysis',
   version: '1.0.0',
   description: 'Professional trading portfolio analysis platform',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
 } as const;
 
 export const API_CONFIG = {
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'),
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? window.location.origin : undefined),
+  timeout: 30000,
+  retries: 3,
+} as const;
 } as const;
 
 export const DHAN_CONFIG = {
-  baseUrl: process.env.DHAN_BASE_URL,
+  baseUrl: process.env.DHAN_BASE_URL || 'https://api.dhan.co/v2',
   accessToken: process.env.DHAN_ACCESS_TOKEN,
-  dataAccessToken: process.env.DHAN_DATA_ACCESS_TOKEN,
-  clientId: process.env.DHAN_CLIENT_ID,
   dataAccessToken: process.env.DHAN_DATA_ACCESS_TOKEN,
   clientId: process.env.DHAN_CLIENT_ID,
   // Client-side accessible client ID
