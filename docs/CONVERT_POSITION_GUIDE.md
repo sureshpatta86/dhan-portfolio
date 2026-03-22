@@ -123,15 +123,15 @@ The Convert Position feature allows users to convert their open trading position
 5. Test API error responses
 6. Test network failures
 
-## Environment Setup
-Ensure `DHAN_ACCESS_TOKEN` is set in `.env.local`:
 ```
-DHAN_ACCESS_TOKEN=your_dhan_api_token_here
+DHAN_ACCESS_TOKEN=<set-via-environment-or-secret-manager>
 ```
 
 ## Dependencies
 - DhanHQ API v2.0
 - Next.js 15.3.4
+- React 18+
+- TypeScript
 - React 18+
 - TypeScript
 - Tailwind CSS
