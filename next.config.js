@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  
+  poweredByHeader: false,
+
   // Webpack configuration to handle chunk loading issues
   webpack: (config, { isServer }) => {
     // Optimize chunk splitting
