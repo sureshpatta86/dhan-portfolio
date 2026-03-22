@@ -3,23 +3,29 @@
  * GET /api/trading/forever-orders - Get all forever orders
  * POST /api/trading/forever-orders - Place new forever order
  */
-
 import { NextRequest, NextResponse } from 'next/server';
 
 const DHAN_API_BASE = 'https://api.dhan.co';
-const ACCESS_TOKEN = process.env.DHAN_ACCESS_TOKEN;
 
-if (!ACCESS_TOKEN) {
-  console.error('DHAN_ACCESS_TOKEN is not configured');
+function getAccessToken() {
+  const accessToken = process.env.DHAN_ACCESS_TOKEN;
+  if (!accessToken) {
+    console.error('DHAN_ACCESS_TOKEN is not configured');
+  }
+
+  return accessToken;
 }
 
 export async function GET() {
-  try {
+export async function GET() {
     console.log('Forever Orders API: GET /api/trading/forever-orders');
     
-    if (!ACCESS_TOKEN) {
+    const accessToken = getAccessToken();
+
+    if (!accessToken) {
       return NextResponse.json(
         { success: false, message: 'Dhan API access token not configured', data: [] },
+        { status: 500 }
         { status: 500 }
       );
     }
@@ -28,7 +34,7 @@ export async function GET() {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'access-token': ACCESS_TOKEN,
+        'access-token': accessToken,
       },
     });
 
@@ -85,13 +91,15 @@ export async function GET() {
       endpoint: '/api/trading/forever-orders',
       data: Array.isArray(data) ? data : [],
       count: Array.isArray(data) ? data.length : 0
-    });
+  try {
+    console.log('Forever Orders API: POST /api/trading/forever-orders');
+    
+    const accessToken = getAccessToken();
 
-  } catch (error) {
-    console.error('Forever Orders API: Error in GET:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
+    if (!accessToken) {
+      return NextResponse.json(
+        { success: false, message: 'Dhan API access token not configured' },
+        { status: 500 }
         message: 'Internal server error',
         data: [],
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -102,13 +110,13 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    console.log('Forever Orders API: POST /api/trading/forever-orders');
-    
-    if (!ACCESS_TOKEN) {
-      return NextResponse.json(
-        { success: false, message: 'Dhan API access token not configured' },
-        { status: 500 }
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'access-token': accessToken,
+      },
+      body: JSON.stringify(body),
+    });
       );
     }
 
