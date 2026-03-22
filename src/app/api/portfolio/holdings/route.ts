@@ -13,15 +13,14 @@ function GET_DHAN_API_CONFIG() {
   }
 
   return {
-    accessToken,
-    baseUrl,
-  };
-}
-
 export async function GET(request: Request) {
   try {
     // Get Dhan API configuration
-    console.log("inside");
+    const { accessToken, baseUrl } = GET_DHAN_API_CONFIG();
+
+    if (!accessToken) {
+      return new Response(
+        JSON.stringify({ error: "Access token is required" }),
     const { accessToken, baseUrl } = GET_DHAN_API_CONFIG();
     console.log(Object.keys(process.env));
     if (!accessToken) {
