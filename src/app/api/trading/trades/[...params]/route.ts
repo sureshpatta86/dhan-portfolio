@@ -29,27 +29,27 @@ export async function GET(
 
     // Validate page number
     const pageNum = parseInt(page);
-    if (isNaN(pageNum) || pageNum < 0) {
-      return NextResponse.json(
-        { error: 'Invalid page number. Must be a non-negative integer' },
-        { status: 400 }
       );
     }
 
-    const ACCESS_TOKEN = process.env.DHAN_ACCESS_TOKEN;
+    const accessToken = process.env.DHAN_ACCESS_TOKEN;
     
-    if (!ACCESS_TOKEN) {
+    if (!accessToken) {
       return NextResponse.json(
         { error: 'API configuration error' },
         { status: 500 }
       );
     }
-
+    
     const response = await fetch(
       `https://api.dhan.co/v2/trades/${fromDate}/${toDate}/${page}`,
       {
         headers: {
           'Accept': 'application/json',
+          'access-token': accessToken,
+        },
+      }
+    );
           'access-token': ACCESS_TOKEN,
         },
       }
