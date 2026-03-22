@@ -5,12 +5,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DHAN_CONFIG } from '@/lib/config/app';
 
-const DHAN_BASE_URL = DHAN_CONFIG.baseUrl;
-const DHAN_DATA_ACCESS_TOKEN = DHAN_CONFIG.dataAccessToken;
-const DHAN_CLIENT_ID = DHAN_CONFIG.clientId;
-
 export async function POST(request: NextRequest) {
   try {
+    const DHAN_BASE_URL = DHAN_CONFIG.baseUrl;
+    const DHAN_DATA_ACCESS_TOKEN = DHAN_CONFIG.dataAccessToken;
+    const DHAN_CLIENT_ID = DHAN_CONFIG.clientId;
+
     if (!DHAN_DATA_ACCESS_TOKEN || !DHAN_CLIENT_ID) {
       return NextResponse.json(
         { 
@@ -55,13 +55,13 @@ export async function POST(request: NextRequest) {
         { 
           error: 'Invalid parameter',
           message: 'UnderlyingSeg must be a non-empty string'
-        },
-        { status: 400 }
-      );
-    }
-
     console.log('Expiry List API Request:', {
       url: `${DHAN_BASE_URL}/optionchain/expirylist`,
+      headers: {
+        'access-token': DHAN_DATA_ACCESS_TOKEN ? '[REDACTED]' : 'missing',
+        'client-id': DHAN_CLIENT_ID || 'missing'
+      },
+      body
       headers: {
         'access-token': DHAN_DATA_ACCESS_TOKEN ? `${DHAN_DATA_ACCESS_TOKEN.substring(0, 20)}...` : 'missing',
         'client-id': DHAN_CLIENT_ID || 'missing'
