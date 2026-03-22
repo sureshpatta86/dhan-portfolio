@@ -5,11 +5,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DHAN_CONFIG } from '@/lib/config/app';
 
-const DHAN_BASE_URL = DHAN_CONFIG.baseUrl;
-const DHAN_DATA_ACCESS_TOKEN = DHAN_CONFIG.dataAccessToken;
-const DHAN_CLIENT_ID = DHAN_CONFIG.clientId;
-
 export async function POST(request: NextRequest) {
+  const { baseUrl: DHAN_BASE_URL, dataAccessToken: DHAN_DATA_ACCESS_TOKEN, clientId: DHAN_CLIENT_ID } = DHAN_CONFIG;
   try {
     if (!DHAN_DATA_ACCESS_TOKEN || !DHAN_CLIENT_ID) {
       return NextResponse.json(
@@ -62,16 +59,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (typeof body.Expiry !== 'string' || body.Expiry.trim() === '') {
-      return NextResponse.json(
-        { 
-          error: 'Invalid parameter',
-          message: 'Expiry must be a non-empty string'
-        },
-        { status: 400 }
-      );
-    }
-
     console.log('Option Chain API Request:', {
+      url: `${DHAN_BASE_URL}/optionchain`,
+      headers: {
+        credentialsConfigured: Boolean(DHAN_DATA_ACCESS_TOKEN && DHAN_CLIENT_ID)
+      },
+    });
+
+    const response = await fetch(`${DHAN_BASE_URL}/optionchain`, {
       url: `${DHAN_BASE_URL}/optionchain`,
       headers: {
         'access-token': DHAN_DATA_ACCESS_TOKEN ? `${DHAN_DATA_ACCESS_TOKEN.substring(0, 20)}...` : 'missing',
