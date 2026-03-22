@@ -20,7 +20,7 @@
     "@heroicons/react": "^2.2.0",
     "@tanstack/react-query": "latest",
     "dotenv": "^17.2.0",
-    "next": "latest",
+    "next": "^16.2.1",
     "react": "latest",
     "react-dom": "latest",
     "typescript": "latest",
