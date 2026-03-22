@@ -11,13 +11,13 @@ export const APP_CONFIG = {
 
 export const API_CONFIG = {
   baseUrl: process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'),
-  timeout: 30000,
-  retries: 3,
 } as const;
 
 export const DHAN_CONFIG = {
-  baseUrl: process.env.DHAN_BASE_URL || 'https://api.dhan.co/v2',
+  baseUrl: process.env.DHAN_BASE_URL,
   accessToken: process.env.DHAN_ACCESS_TOKEN,
+  dataAccessToken: process.env.DHAN_DATA_ACCESS_TOKEN,
+  clientId: process.env.DHAN_CLIENT_ID,
   dataAccessToken: process.env.DHAN_DATA_ACCESS_TOKEN,
   clientId: process.env.DHAN_CLIENT_ID,
   // Client-side accessible client ID
