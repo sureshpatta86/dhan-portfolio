@@ -3,26 +3,31 @@
  * PUT /api/trading/forever-orders/[orderId] - Modify forever order
  * DELETE /api/trading/forever-orders/[orderId] - Cancel forever order
  */
-
 import { NextRequest, NextResponse } from 'next/server';
 
 const DHAN_API_BASE = 'https://api.dhan.co';
-const ACCESS_TOKEN = process.env.DHAN_ACCESS_TOKEN;
 
-if (!ACCESS_TOKEN) {
-  console.error('DHAN_ACCESS_TOKEN is not configured');
+function getAccessToken() {
+  const accessToken = process.env.DHAN_ACCESS_TOKEN;
+  if (!accessToken) {
+    console.error('DHAN_ACCESS_TOKEN is not configured');
+  }
+  return accessToken;
 }
 
 export async function PUT(
+export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ orderId: string }> }
-) {
-  try {
     const { orderId } = await params;
     console.log('Forever Order Modify API: PUT /api/trading/forever-orders/' + orderId);
     
-    if (!ACCESS_TOKEN) {
+    const accessToken = getAccessToken();
+
+    if (!accessToken) {
       return NextResponse.json(
+        { success: false, message: 'Dhan API access token not configured' },
+        { status: 500 }
         { success: false, message: 'Dhan API access token not configured' },
         { status: 500 }
       );
@@ -30,13 +35,13 @@ export async function PUT(
 
     const body = await request.json();
     console.log('Forever Order Modify API: Request body:', JSON.stringify(body, null, 2));
-
-    const response = await fetch(`${DHAN_API_BASE}/v2/forever/orders/${orderId}`, {
-      method: 'PUT',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'access-token': ACCESS_TOKEN,
+        'access-token': accessToken,
+      },
+      body: JSON.stringify(body),
+    });
       },
       body: JSON.stringify(body),
     });
@@ -86,23 +91,25 @@ export async function PUT(
   } catch (error) {
     console.error('Forever Order Modify API: Error in PUT:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        message: 'Internal server error',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    );
+    const { orderId } = await params;
+    console.log('Forever Order Cancel API: DELETE /api/trading/forever-orders/' + orderId);
+    
+    const accessToken = getAccessToken();
+
+    if (!accessToken) {
+      return NextResponse.json(
+        { success: false, message: 'Dhan API access token not configured' },
+        { status: 500 }
   }
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ orderId: string }> }
-) {
-  try {
-    const { orderId } = await params;
-    console.log('Forever Order Cancel API: DELETE /api/trading/forever-orders/' + orderId);
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'access-token': accessToken,
+      },
+    });
     
     if (!ACCESS_TOKEN) {
       return NextResponse.json(
